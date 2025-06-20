@@ -324,6 +324,39 @@ The current approach of dynamically building the entire UI in JavaScript creates
 - Chord progression remains functional despite position jumping
 - Refresh page to reset UI layout to original positions
 
+## 🚀 Future Enhancements
+
+### 🎵 Dynamic Song Directory Loading
+**Status**: Planned
+
+**Goal**: Automatically detect and load MP3 files from the `songs/` directory instead of requiring manual updates to the `bestHitsSongs` array in `MusicalScale.js`.
+
+**Proposed Implementation Options**:
+1. **JSON Manifest Approach** (Recommended):
+   - Create `songs/songs.json` with song metadata
+   - Fetch and parse JSON to populate Best Hits dropdown
+   - Easy to maintain, allows custom titles/artists
+   - Browser-compatible, no server changes needed
+
+2. **Pattern-Based Discovery**:
+   - Use Fetch API to test for files matching patterns (`Claude*.mp3`, `Project*.mp3`)
+   - Build song list based on successful HTTP responses
+   - Fully automatic but limited metadata options
+
+3. **Build-Time Script**:
+   - Node.js script to scan directory and update JS file
+   - Could integrate with development workflow
+   - Requires build process setup
+
+**Benefits**:
+- No more manual code updates when adding songs
+- Easier for non-developers to add new music
+- Scalable to larger song collections
+- Reduces chance of errors in song list maintenance
+
+**Current Process**: Adding songs requires editing `MusicalScale.js` and updating `songs/README.md`
+**Future Process**: Drop MP3 in songs folder, optionally update metadata file
+
 ---
 
 ## Differences from Original
