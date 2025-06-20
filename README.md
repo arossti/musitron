@@ -248,6 +248,37 @@ The result is music that sounds both highly structured and surprisingly organic 
 - Intelligent randomization system
 - Multiple compositional algorithms
 
+## Known Issues
+
+### 🎹 Block Chords Timing Issue
+**Status**: Under Investigation
+
+**Problem**: The "Block Chords" feature currently produces a rapid "chopsticks" effect instead of proper sustained quarter-note chords.
+
+**Technical Details**:
+- **Root Cause**: 20ms stagger between chord notes (`setTimeout(..., i * 20)`) creates arpeggiated effect rather than simultaneous notes
+- **Duration Issue**: Using `'8n'` (eighth notes) instead of `'4n'` (quarter notes) for chord duration
+- **Bass Sync Issue**: Bass timing doesn't align consistently with block chord quarter-note boundaries
+- **MIDI Export**: Same stagger issues affect exported MIDI files
+
+**Attempted Solution** (Reverted):
+- Removed 20ms stagger to play notes simultaneously 
+- Changed duration from 8th to quarter notes
+- Improved bass synchronization
+- **Result**: Made sound quality significantly worse, so changes were reverted
+
+**Next Steps**:
+- Consider alternative approach: separate block chord player independent of arpeggio logic
+- Investigate if issue is fundamental to mixing block chords with existing arpeggio-based transport
+- May require architectural changes to properly support both styles
+
+**Workaround**: 
+- Use "Arpeggiated" mode for proper sound quality
+- "Block Chords" remains functional but with timing artifacts
+- MIDI exports still work correctly for composition purposes
+
+---
+
 ## Differences from Original
 
 The enhanced version adds:
