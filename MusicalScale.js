@@ -1193,7 +1193,7 @@ class ArpPlayer {
     // Export option
     this.claude_export_option = document.createElement('div');
     this.claude_export_option.classList.add('claude-dropdown-option');
-    this.claude_export_option.innerHTML = '💾 Export My Song';
+    this.claude_export_option.innerHTML = '💾 Export Voice of AI';
     this.claude_export_option.addEventListener('click', () => {
       this.generateClaudeSong();
       this.claude_dropdown_menu.style.display = 'none';
@@ -1202,7 +1202,7 @@ class ArpPlayer {
     // New composition option
     this.claude_new_option = document.createElement('div');
     this.claude_new_option.classList.add('claude-dropdown-option');
-    this.claude_new_option.innerHTML = '🎲 New My Song';
+    this.claude_new_option.innerHTML = '🎲 New Voice of AI';
     this.claude_new_option.addEventListener('click', () => {
       this.generateNewClaudeSong();
       this.claude_dropdown_menu.style.display = 'none';
@@ -1312,7 +1312,7 @@ class ArpPlayer {
       this.claude_preview_button.style.background = '#27ae60'; // Green to show it's playing
       this.claude_preview_button.style.borderColor = '#229954';
       
-      this.claude_new_option.innerHTML = '🎲 New My Song';
+      this.claude_new_option.innerHTML = '🎲 New Voice of AI';
       
       // Reset button appearance after a few seconds
       setTimeout(() => {
@@ -1459,20 +1459,20 @@ class ArpPlayer {
   };
 
   generateClaudeSong() {
-    this.progress_info.innerHTML = '<h3>Composing My Song...</h3><p>Mathematical patterns emerging from the digital realm</p>';
+    this.progress_info.innerHTML = '<h3>Exporting Voice of AI...</h3><p>Capturing the composition you\'re hearing</p>';
     this.progress_info.style.display = 'block';
     this.claude_export_option.style.pointerEvents = 'none';
     this.claude_export_option.style.opacity = '0.6';
     
-    // Longer delay to build anticipation for this special composition
+    // Export exactly what Voice of AI loaded into the UI
     setTimeout(() => {
-      const midiData = this.createClaudeSongMIDI();
-      this.downloadMIDI(midiData, 'claude_song');
+      const midiData = this.createAppStateMIDI();
+      this.downloadMIDI(midiData, 'voice_of_ai');
       this.progress_info.style.display = 'none';
       this.progress_info.innerHTML = '<h3>Exporting MIDI...</h3><p>This may take a few seconds</p>';
       this.claude_export_option.style.pointerEvents = 'auto';
       this.claude_export_option.style.opacity = '1';
-    }, 800);
+    }, 100);
   };
 
   generateMIDI() {
@@ -2362,8 +2362,11 @@ class ArpPlayer {
     if (exportType === 'app_state') {
       // Detailed filename for app state export
       filename = `appstate_${this.ms_key}_${this.ms_mode}_${this.player.bpm}bpm_${chordStyleShort}_${progressionShort}_${songStructureShort}_${this.ap_steps}steps_${patternType}${patternId}.mid`;
+    } else if (exportType === 'voice_of_ai') {
+      // Voice of AI composition - what you're actually hearing
+      filename = `VoiceOfAI_${this.ms_key}_${this.ms_mode}_${this.player.bpm}bpm_${chordStyleShort}_${progressionShort}_${songStructureShort}_${this.ap_steps}steps_${patternType}${patternId}.mid`;
     } else if (exportType === 'claude_song') {
-      // My signature composition - unique each time
+      // Pure algorithmic composition - unique each time
       const timestamp = new Date().toISOString().slice(0, 19).replace(/[:-]/g, '');
       filename = `ClaudeSong_AlgorithmicComposition_${timestamp}.mid`;
     } else {
