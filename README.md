@@ -277,6 +277,30 @@ The result is music that sounds both highly structured and surprisingly organic 
 - "Block Chords" remains functional but with timing artifacts
 - MIDI exports still work correctly for composition purposes
 
+### 🎛️ Chord Progression UI Jumping Issue
+**Status**: Architecture Needs Improvement
+
+**Problem**: The "Chord Progression" section frequently jumps to the bottom of the UI when pressing various buttons (randomizer, Voice of AI, mode changes, etc.).
+
+**Technical Details**:
+- **Root Cause**: DOM rebuilding logic in `_updateChordSelector()` removes and recreates the entire chord selector
+- **Rebuild Triggers**: Multiple UI actions call `_updateChordSelector()` which appends new elements to end of DOM
+- **Expected Position**: Chord progression should stay immediately under the keyboard regardless of button pressed
+- **Current Behavior**: Gets pushed to bottom after other sections when selectors rebuild
+
+**Potential Solutions**:
+- **HTML Structure Approach**: Create fixed HTML wrapper containers and let JS render within predefined structure
+- **DOM Insertion Fix**: Use `insertBefore()` or `replaceChild()` instead of `remove()` + `appendChild()`
+- **Position Anchoring**: Maintain reference to keyboard element and ensure chord progression always follows it
+- **Selective Updates**: Update chord display content without full DOM rebuilding
+
+**Architectural Consideration**: 
+The current approach of dynamically building the entire UI in JavaScript creates fragile DOM ordering. A hybrid approach with HTML structure containers + JS content rendering would be more stable.
+
+**Workaround**:
+- Chord progression remains functional despite position jumping
+- Refresh page to reset UI layout to original positions
+
 ---
 
 ## Differences from Original
