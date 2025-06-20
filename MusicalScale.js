@@ -606,7 +606,9 @@ class ArpPlayer {
       if(!this.player.bass_on && this.shouldPlayBass(section)) {
         this.player.bass_on = true;
         let bass_velocity = section.layers > 1 ? 0.8 : 0.6;
-        this.synths.bass.triggerAttack(bass_1, time);
+        // For block chords, use longer bass notes that sustain through the harmony
+        let bass_duration = this.chord_style === 'block_chords' ? '2n' : '4n';
+        this.synths.bass.triggerAttackRelease(bass_1, bass_duration, time, bass_velocity);
         this._utilActiveNoteClassToggle([bass_1.replace('#', 'is')], 'active-b');
       }
       
@@ -624,7 +626,7 @@ class ArpPlayer {
       if(this.player.step % chord_change_interval === 0) {
         this.player.chord_step++;
         this.player.bass_on = false;
-        this.synths.bass.triggerRelease(time);
+        // Bass release is now handled by triggerAttackRelease with duration
         this.player.triad_step++;
       }
       
@@ -632,16 +634,18 @@ class ArpPlayer {
       let velocity = this.getDynamicVelocity(section, this.section_step);
       
       if (this.chord_style === 'block_chords' && section.layers > 1) {
-        // Play block chords  
+        // Play block chords - quarter note rhythm, simultaneous notes
         let stepInMeasure = this.player.step % 16;
         if (stepInMeasure % 4 === 0) {
+          // Play all chord notes simultaneously for true block chord sound
+          let chordNoteRefs = [];
           chord.triad.notes.forEach((chordNote, i) => {
             let chord_note_ref = `${chordNote.note}${chordNote.rel_octave + this.player.octave_base}`;
-            setTimeout(() => {
-              this._utilActiveNoteClassToggle([chord_note_ref.replace('#', 'is')], 'active-t');
-              this.synths.treb.triggerAttackRelease(chord_note_ref, '8n', time, velocity * 0.8);
-            }, i * 20); // Slight stagger for clearer sound
+            chordNoteRefs.push(chord_note_ref.replace('#', 'is'));
+            this.synths.treb.triggerAttackRelease(chord_note_ref, '4n', time, velocity * 0.8);
           });
+          // Update keyboard display for all notes at once
+          this._utilActiveNoteClassToggle(chordNoteRefs, 'active-t');
         }
       } else {
         // Play arpeggiated pattern (original behavior)
@@ -2069,8 +2073,8 @@ class ArpPlayer {
     // TRACK 1: HARMONY - Random harmonic support
     if (section.layers >= 2) {
       if (currentTexture.harmonyStyle === 'block') {
-        // Random block chords
-        if (stepInMeasure % (Math.floor(Math.random() * 4) + 2) === 0) {
+        // Random block chords - quarter note rhythm
+        if (stepInMeasure % 4 === 0) { // Consistent quarter note timing
           chord.triad.notes.forEach((chordNote, i) => {
             let harmonyMidi = this.noteToMidi[chordNote.note] + (chordNote.rel_octave + this.player.octave_base + currentInversion.octaveShift) * 12;
             
@@ -2079,8 +2083,8 @@ class ArpPlayer {
               harmonyMidi += i * (Math.random() < 0.5 ? 12 : 0);
             }
             
-            const stagger = i * (20 + Math.random() * 40); // Random stagger timing
-            this.addMIDINote(tracks[1], harmonyMidi, midiTime + stagger, quarterNote, Math.floor(velocity * 0.7));
+            // No stagger - play simultaneously for true block chord effect
+            this.addMIDINote(tracks[1], harmonyMidi, midiTime, quarterNote, Math.floor(velocity * 0.7));
           });
         }
       } else {
@@ -2163,27 +2167,27 @@ class ArpPlayer {
     if (this.chord_style === 'block_chords' && section.layers > 1) {
       // BLOCK CHORD STYLE - Distribute across 4 tracks
       
-      // TRACK 0: Lead block chords (main rhythm)
+      // TRACK 0: Lead block chords (main rhythm) - quarter note timing
       if (stepInMeasure % 4 === 0) {
         chord.triad.notes.forEach((chordNote, i) => {
           const midiNote = this.noteToMidi[chordNote.note] + (chordNote.rel_octave + this.player.octave_base) * 12;
-          this.addMIDINote(tracks[0], midiNote, midiTime + (i * 20), quarterNote, velocity);
+          this.addMIDINote(tracks[0], midiNote, midiTime, quarterNote, velocity); // No stagger - simultaneous
         });
       }
       
       // TRACK 1: Harmony block chords (offset rhythm for richness)
-      if (stepInMeasure % 6 === 0) {
+      if (stepInMeasure % 8 === 0) { // Less frequent to avoid muddiness
         chord.triad.notes.forEach((chordNote, i) => {
           const harmonyNote = this.noteToMidi[chordNote.note] + (chordNote.rel_octave + this.player.octave_base) * 12;
-          this.addMIDINote(tracks[1], harmonyNote, midiTime + (i * 30), eighthNote, Math.floor(velocity * 0.8));
+          this.addMIDINote(tracks[1], harmonyNote, midiTime, quarterNote, Math.floor(velocity * 0.8)); // No stagger - simultaneous
         });
       }
       
       // TRACK 3: Texture layer (higher octave, more sparse)
-      if (stepInMeasure % 8 === 0 && section.layers >= 3) {
+      if (stepInMeasure % 16 === 0 && section.layers >= 3) { // Very sparse texture
         chord.triad.notes.forEach((chordNote, i) => {
           const textureNote = this.noteToMidi[chordNote.note] + (chordNote.rel_octave + this.player.octave_base + 1) * 12;
-          this.addMIDINote(tracks[3], textureNote, midiTime + (i * 40), eighthNote, Math.floor(velocity * 0.6));
+          this.addMIDINote(tracks[3], textureNote, midiTime, quarterNote, Math.floor(velocity * 0.6)); // No stagger - simultaneous
         });
       }
       
@@ -2424,19 +2428,39 @@ class ArpPlayer {
   
   shouldPlayBass(section) {
     // Determine when to play bass based on section
-    switch(section.name) {
-      case 'intro':
-        return this.player.step % 8 === 0; // Sparse bass
-      case 'building':
-        return this.player.step % 4 === 0; // Regular bass
-      case 'complexity':
-        return this.player.step % 2 === 0; // More frequent bass
-      case 'reduction':
-        return this.player.step % 6 === 0; // Irregular bass
-      case 'finale':
-        return this.player.step % 8 === 0; // Return to sparse
-      default:
-        return this.player.step % 4 === 0;
+    // For block chords, bass should align with beat boundaries
+    if (this.chord_style === 'block_chords') {
+      // Bass aligns with block chord quarter notes for better synchronization
+      switch(section.name) {
+        case 'intro':
+          return this.player.step % 16 === 0; // Once per measure
+        case 'building':
+          return this.player.step % 8 === 0; // Twice per measure
+        case 'complexity':
+          return this.player.step % 4 === 0; // Every quarter note (with chords)
+        case 'reduction':
+          return this.player.step % 12 === 0; // Every 3 quarter notes
+        case 'finale':
+          return this.player.step % 16 === 0; // Once per measure
+        default:
+          return this.player.step % 8 === 0;
+      }
+    } else {
+      // Original timing for arpeggiated style
+      switch(section.name) {
+        case 'intro':
+          return this.player.step % 8 === 0; // Sparse bass
+        case 'building':
+          return this.player.step % 4 === 0; // Regular bass
+        case 'complexity':
+          return this.player.step % 2 === 0; // More frequent bass
+        case 'reduction':
+          return this.player.step % 6 === 0; // Irregular bass
+        case 'finale':
+          return this.player.step % 8 === 0; // Return to sparse
+        default:
+          return this.player.step % 4 === 0;
+      }
     }
   };
   
