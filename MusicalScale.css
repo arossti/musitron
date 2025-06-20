@@ -610,28 +610,51 @@ button.best-hits-dropdown:disabled {
 
 .best-hits-dropdown-menu {
   position: absolute !important;
-  z-index: 9999 !important;
-  background: #229954;
-  border: 2px solid #1e8449;
+  z-index: 99999 !important;
+  background: #1e8449 !important;
+  border: 2px solid #16703e !important;
   border-radius: 4px;
-  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4);
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4) !important;
   overflow: hidden;
+  top: 100% !important;
+  left: 0 !important;
+  width: 100% !important;
+  margin-top: 2px !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.best-hits-section {
+  position: relative;
+  z-index: 10;
 }
 
 .best-hits-dropdown-option {
-  padding: 0.5rem 1rem;
-  color: white;
+  padding: 0.75rem 1rem !important;
+  color: #ffffff !important;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.9rem !important;
+  font-weight: bold !important;
   transition: background 0.2s ease;
-  border-bottom: 1px solid #1e8449;
-  display: flex;
+  border-bottom: 1px solid #16703e !important;
+  display: flex !important;
   align-items: center;
   justify-content: space-between;
+  background: #1e8449 !important;
+}
+
+.best-hits-dropdown-option * {
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+.best-hits-dropdown-option span {
+  color: #ffffff !important;
+  font-weight: bold !important;
 }
 
 .best-hits-dropdown-option:hover {
-  background: #1e8449 !important;
+  background: #16703e !important;
 }
 
 .best-hits-dropdown-option:last-child {
@@ -647,6 +670,7 @@ button.best-hits-dropdown:disabled {
   font-size: 0.8rem;
   opacity: 0.8;
   margin-left: 0.5rem;
+  color: #f39c12 !important;
 }
 
 @keyframes bestHitsGlow {
@@ -702,4 +726,9 @@ button.best-hits-dropdown:disabled {
 .audio-player-info .time-display {
   font-size: 0.7rem;
   opacity: 0.8;
+}
+
+/* Native Audio Player Styling */
+.native-audio-player {
+  /* All styling handled inline in JavaScript for simplicity */
 }

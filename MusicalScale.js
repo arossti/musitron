@@ -47,13 +47,13 @@ class MusicalScale {
 
     this._loadScale(params);
   }
-
+  
   pubUpdateScale(params) {
     const errors = this._errors(params);
     if (errors) return;
     this._loadScale(params);
   }
-
+  
   _loadScale(params) {
     // clean up the key param
     this.key = this._paramKey(params.key);
@@ -61,7 +61,7 @@ class MusicalScale {
     this.mode = params.mode;
     this.notes = [];
     this._scale = this.dict.scales[this._paramMode(this.mode)];
-
+    
     // notes to cycle through
     const keys = this.dict.keys;
     // starting index for key loop
@@ -84,7 +84,7 @@ class MusicalScale {
       this.notes.push(note);
     }
   }
-
+  
   // create a chord of notes based on chord type
   _genTriad(s, offset, octave, t) {
     // get the steps for this chord type
@@ -103,7 +103,7 @@ class MusicalScale {
     }
     return chord;
   }
-
+  
   // proper interval notation from the step and type
   _intervalFromType(step, type) {
     const steps = "i ii iii iv v vi vii".split(" ");
@@ -124,7 +124,7 @@ class MusicalScale {
     }
     return s;
   }
-
+  
   _errors(params) {
     if (this.dict.keys.indexOf(params.key) === -1) {
       if (Object.keys(this.dict.flat_sharp).indexOf(params.key) === -1) {
@@ -140,7 +140,7 @@ class MusicalScale {
       return false;
     }
   }
-
+  
   _loadDictionary() {
     return {
       keys: "C C# D D# E F F# G G# A A# B".split(" "),
@@ -230,7 +230,7 @@ class MusicalScale {
       },
     };
   }
-
+    
   _paramMode(mode) {
     return {
       minor: "aeo",
@@ -246,7 +246,7 @@ class MusicalScale {
       harmonic: "har",
     }[mode];
   }
-
+  
   _paramKey(key) {
     if (this.dict.flat_sharp[key]) return this.dict.flat_sharp[key];
     return key;
@@ -261,7 +261,7 @@ class MusicalScale {
     }
     return triads;
   }
-
+  
   _genSteps(steps_str) {
     const arr = steps_str.split(" ");
     const steps = [0];
@@ -301,12 +301,12 @@ class ArpeggioPatterns {
     this._loadPatterns();
     this.updatePatterns = this.pubUpdatePatterns;
   }
-
+  
   pubUpdatePatterns(params) {
     this.steps = params.steps;
     this._loadPatterns();
   }
-
+  
   _loadPatterns() {
     this.arr = [];
     this.patterns = [];
@@ -321,7 +321,7 @@ class ArpeggioPatterns {
       looped: this.looped,
     };
   }
-
+  
   _permute(input, permutations) {
     permutations = permutations || [];
     let i, ch;
@@ -337,7 +337,7 @@ class ArpeggioPatterns {
     }
     return permutations;
   }
-
+  
   _loop() {
     const looped = [];
     for (let p = 0; p < this.permutations.length; p++) {
@@ -361,7 +361,7 @@ class ArpPlayer {
   constructor(params) {
     this.container = document.querySelector("#main");
     this.aside = document.querySelector("#aside");
-
+    
     // Enhanced Philip Glass-style chord progressions
     this.progressions = {
       simple: [0, 2, 4, 2],
@@ -370,10 +370,10 @@ class ArpPlayer {
       glass_3: [0, 2, 4, 6, 2, 5, 1, 4, 0],
       minimalist: [0, 3, 4, 2, 5, 1, 6, 2, 0],
     };
-
+    
     this.chords = this.progressions.glass_1;
     this.current_progression = "glass_1";
-
+    
     // Composition structure inspired by Philip Glass
     this.composition_structure = [
       { name: "intro", duration: 16, layers: 1, tempo_mod: 0.8 },
@@ -382,7 +382,7 @@ class ArpPlayer {
       { name: "reduction", duration: 24, layers: 2, tempo_mod: 1.0 },
       { name: "finale", duration: 16, layers: 1, tempo_mod: 0.9 },
     ];
-
+    
     // Song Composer Presets
     this.song_presets = {
       classic_glass: {
@@ -417,17 +417,17 @@ class ArpPlayer {
         ],
       },
     };
-
+    
     this.current_section = 0;
     this.section_step = 0;
     this.current_song_preset = "classic_glass";
-
+    
     // MIDI configuration
     this.midi_config = {
       duration: 180, // 3 minutes
       ticksPerQuarter: 480,
     };
-
+    
     // Note mappings for MIDI (C4 = 60)
     this.noteToMidi = {
       C: 0,
@@ -450,7 +450,7 @@ class ArpPlayer {
     this.ap_pattern_type = "straight";
     this.ap_pattern_id = 0;
     this.chord_style = "arpeggiated"; // New: arpeggiated or block_chords
-
+    
     this.player = {
       chord_step: 0,
       octave_base: 4,
@@ -463,28 +463,32 @@ class ArpPlayer {
       pattern_variation: 0,
       dynamic_level: 0.7,
     };
-
+    
     this.chord_count = this.chords.length;
     this._setMusicalScale();
     this._setArpeggioPatterns();
     this._drawKeyboard();
     this._loadChordSelector(); // Move chord selector right after keyboard
     this._drawOutput();
-    this._loadProgressionSelector();
-    this._loadChordStyleSelector(); // New: Block chords vs arpeggiated
-    this._loadSongComposer(); // New: Song structure presets
-    this._loadRandomizer(); // New: Randomize all settings
-    this._loadMIDIControls();
-    this._loadBestHitsPlayer();
     this._loadBPMSelector();
+    
+    // Core selectors - load these first
     this._loadKeySelector();
     this._loadModeSelector();
     this._loadStepsSelector();
     this._loadTypeSelector();
     this._loadPatternSelector();
+    this._loadProgressionSelector();
+    this._loadChordStyleSelector(); // New: Block chords vs arpeggiated
+    this._loadSongComposer(); // New: Song structure presets
+    
+    // Create buttons section AFTER all core components
+    this._createButtonsSection();
+    
+    // Load synths and transport last
     this._loadSynths();
     this._loadTransport();
-
+    
     // Handle audio context suspension when page becomes hidden/visible
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) {
@@ -498,7 +502,7 @@ class ArpPlayer {
       }
     });
   }
-
+  
   _loadSynths() {
     try {
       this.channel = {
@@ -515,7 +519,7 @@ class ArpPlayer {
         treb: new Tone.PolySynth(Tone.Synth),
         bass: new Tone.DuoSynth(),
       };
-
+      
       this.synths.bass.vibratoAmount.value = 0.1;
       this.synths.bass.harmonicity.value = 1.5;
       this.synths.bass.voice0.oscillator.type = "triangle";
@@ -539,7 +543,7 @@ class ArpPlayer {
         delay: new Tone.PingPongDelay("16n", 0.1),
       };
     }
-
+    
     // fx mixes
     this.fx.distortion.wet.value = 0.2;
     this.fx.reverb.wet.value = 0.2;
@@ -552,7 +556,7 @@ class ArpPlayer {
     this.synths.treb.chain(this.fx.delay, this.fx.reverb, this.channel.treb);
     this.synths.bass.chain(this.fx.distortion, this.channel.bass);
   }
-
+  
   _loadTransport() {
     this.playerUpdateBPM = (e) => {
       const el = e.target;
@@ -561,7 +565,7 @@ class ArpPlayer {
       Tone.Transport.bpm.value = this.player.bpm;
       this._utilClassToggle(e.target, "bpm-current");
     };
-
+    
     this.playerToggle = async () => {
       try {
         if (this.player.playing) {
@@ -591,7 +595,7 @@ class ArpPlayer {
         }, 2000);
       }
     };
-
+    
     // Add a general pause function for external use
     this.pause = () => {
       if (this.player.playing) {
@@ -613,7 +617,7 @@ class ArpPlayer {
     this.play_toggle.addEventListener("click", async (e) => {
       await this.playerToggle();
     });
-
+    
     Tone.Transport.bpm.value = this.player.bpm;
     Tone.Transport.scheduleRepeat((time) => {
       // Get current composition section
@@ -629,7 +633,7 @@ class ArpPlayer {
       if (curr) curr.classList.add("active");
 
       const chord = this.MS.notes[this.chords[curr_chord]];
-
+      
       // Enhanced pattern variation based on section
       const pattern_multiplier = section.layers;
       let notes = chord.triad.notes;
@@ -644,7 +648,7 @@ class ArpPlayer {
           }),
         );
       }
-
+      
       // Add some Philip Glass-style pattern variations
       const pattern_variation = this.getPatternVariation(
         section,
@@ -659,7 +663,7 @@ class ArpPlayer {
       // Dynamic bass line based on section
       const bass_o = chord.rel_octave + 2;
       const bass_1 = chord.note + bass_o;
-
+      
       // slappin da bass
       if (!this.player.bass_on && this.shouldPlayBass(section)) {
         this.player.bass_on = true;
@@ -669,10 +673,10 @@ class ArpPlayer {
           "active-b",
         );
       }
-
+      
       this.player.step++;
       this.section_step++;
-
+      
       // Change sections
       if (this.section_step >= section.duration * 4) {
         // 4 steps per beat
@@ -680,7 +684,7 @@ class ArpPlayer {
           (this.current_section + 1) % this.composition_structure.length;
         this.section_step = 0;
       }
-
+      
       // changing chords
       const chord_change_interval = this.getChordChangeInterval(section);
       if (this.player.step % chord_change_interval === 0) {
@@ -689,12 +693,12 @@ class ArpPlayer {
         this.synths.bass.triggerRelease(time);
         this.player.triad_step++;
       }
-
+      
       // Play treble with dynamic velocity - handle both arpeggiated and block chords
       const velocity = this.getDynamicVelocity(section, this.section_step);
-
+      
       if (this.chord_style === "block_chords" && section.layers > 1) {
-        // Play block chords
+        // Play block chords  
         const stepInMeasure = this.player.step % 16;
         if (stepInMeasure % 4 === 0) {
           chord.triad.notes.forEach((chordNote, i) => {
@@ -724,7 +728,7 @@ class ArpPlayer {
       }
     }, "16n");
   }
-
+  
   _drawKeyboard() {
     const octaves = [2, 3, 4, 5, 6, 7];
     const keyboard = document.createElement("section");
@@ -739,14 +743,14 @@ class ArpPlayer {
       });
     });
   }
-
+  
   _drawOutput() {
     this.output = document.createElement("section");
     this.output.classList.add("output");
     this.aside.appendChild(this.output);
     this._updateOutput();
   }
-
+  
   _updateOutput() {
     this.output.innerHTML = "";
     const title = document.createElement("h1");
@@ -762,7 +766,7 @@ class ArpPlayer {
       this.output.appendChild(el);
     });
   }
-
+    
   _loadBPMSelector() {
     const bpm_container = document.createElement("section");
     bpm_container.classList.add("bpm");
@@ -770,7 +774,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Beats Per Minute";
     bpm_container.appendChild(title);
-
+    
     [45, 60, 75, 90, 105, 120, 135, 150].forEach((bpm) => {
       const el = document.createElement("div");
       el.setAttribute("data-value", bpm);
@@ -782,7 +786,7 @@ class ArpPlayer {
       bpm_container.appendChild(el);
     });
   }
-
+  
   _loadChordSelector() {
     this.chord_container = document.createElement("section");
     this.chord_container.classList.add("chord");
@@ -790,7 +794,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Chord Progression";
     this.chord_container.appendChild(title);
-
+    
     this.msUpdateChords = (e) => {
       const el = e.target;
       const chord = el.getAttribute("data-chord");
@@ -799,7 +803,7 @@ class ArpPlayer {
       this._utilClassToggle(e.target, `chord-${chord}-current`);
       this._updateOutput();
     };
-
+    
     for (let c = 0; c < this.chord_count; c++) {
       const chord_el = document.createElement("div");
       this.MS.notes.forEach((note, i) => {
@@ -815,10 +819,10 @@ class ArpPlayer {
       });
       this.chord_container.appendChild(chord_el);
     }
-
+    
     this._updateChords();
   }
-
+  
   _updateChords() {
     this.MS.notes.forEach((note, i) => {
       const updates = document.querySelectorAll(
@@ -829,7 +833,7 @@ class ArpPlayer {
       }
     });
   }
-
+  
   _loadKeySelector() {
     const key_container = document.createElement("section");
     key_container.classList.add("keys");
@@ -837,7 +841,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Tonic / Root";
     key_container.appendChild(title);
-
+    
     this.MS.dict.keys.forEach((key) => {
       const el = document.createElement("div");
       el.setAttribute("data-value", key);
@@ -849,7 +853,7 @@ class ArpPlayer {
       key_container.appendChild(el);
     });
   }
-
+  
   _loadModeSelector() {
     const mode_container = document.createElement("section");
     mode_container.classList.add("modes");
@@ -857,7 +861,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Mode";
     mode_container.appendChild(title);
-
+    
     this.MS.dict.modes.forEach((mode) => {
       const el = document.createElement("div");
       el.setAttribute("data-value", mode);
@@ -869,7 +873,7 @@ class ArpPlayer {
       mode_container.appendChild(el);
     });
   }
-
+  
   _loadTypeSelector() {
     const type_container = document.createElement("section");
     type_container.classList.add("type");
@@ -877,7 +881,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Arpeggio Type";
     type_container.appendChild(title);
-
+    
     ["straight", "looped"].forEach((step) => {
       const el = document.createElement("div");
       el.setAttribute("data-value", step);
@@ -889,7 +893,7 @@ class ArpPlayer {
       type_container.appendChild(el);
     });
   }
-
+  
   _loadStepsSelector() {
     const steps_container = document.createElement("section");
     steps_container.classList.add("steps");
@@ -897,7 +901,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Arpeggio Steps";
     steps_container.appendChild(title);
-
+    
     [3, 4, 5, 6].forEach((step) => {
       const el = document.createElement("div");
       el.setAttribute("data-value", step);
@@ -909,14 +913,14 @@ class ArpPlayer {
       steps_container.appendChild(el);
     });
   }
-
+  
   _loadPatternSelector() {
     this.pattern_container = document.createElement("section");
     this.pattern_container.classList.add("patterns");
     this.container.appendChild(this.pattern_container);
     this._updatePatternSelector();
   }
-
+  
   _updatePatternSelector() {
     this.pattern_container.innerHTML = "";
     // reset if the id is over
@@ -945,7 +949,7 @@ class ArpPlayer {
       this.pattern_container.appendChild(el);
     });
   }
-
+  
   _genPatternSvg(pattern) {
     const hi = Array.from(pattern).sort()[pattern.length - 1];
     const spacing = 2;
@@ -973,13 +977,13 @@ class ArpPlayer {
     svg.appendChild(polyline);
     return svg;
   }
-
+  
   _setMusicalScale() {
     this.MS = new MusicalScale({ key: this.ms_key, mode: this.ms_mode });
     this.msUpdateKey = (e) => {
       this._utilClassToggle(e.target, "key-current");
       this.ms_key = e.target.getAttribute("data-value");
-      this.msUpdateScale();
+      this.msUpdateScale(); 
     };
     this.msUpdateMode = (e) => {
       this._utilClassToggle(e.target, "mode-current");
@@ -987,46 +991,46 @@ class ArpPlayer {
       this.msUpdateScale();
       this._updateChords();
     };
-    this.msUpdateScale = () => {
-      this.MS.updateScale({ key: this.ms_key, mode: this.ms_mode });
+    this.msUpdateScale = () => { 
+      this.MS.updateScale({ key: this.ms_key, mode: this.ms_mode }); 
       this._updateOutput();
     };
   }
-
+  
   _setArpeggioPatterns() {
     this.AP = new ArpeggioPatterns({ steps: this.ap_steps });
-    this.apUpdateSteps = (e) => {
+    this.apUpdateSteps = (e) => { 
       this._utilClassToggle(e.target, "step-current");
       const steps = e.target.getAttribute("data-value");
-      this.ap_steps = parseInt(steps);
-      this.AP.updatePatterns({ steps: steps });
-      this.apUpdate();
+      this.ap_steps = parseInt(steps); 
+      this.AP.updatePatterns({ steps: steps }); 
+      this.apUpdate(); 
       this._updatePatternSelector();
     };
-    this.apUpdatePatternType = (e) => {
+    this.apUpdatePatternType = (e) => { 
       this._utilClassToggle(e.target, "type-current");
       this.ap_pattern_type = e.target.getAttribute("data-value");
-      this.apUpdate();
+      this.apUpdate(); 
       this._updatePatternSelector();
     };
-    this.apUpdatePatternId = (e) => {
+    this.apUpdatePatternId = (e) => { 
       this._utilClassToggle(e.target, "id-current");
       this.ap_pattern_id = parseInt(e.target.getAttribute("data-value"));
-      this.apUpdate();
+      this.apUpdate(); 
     };
-    this.apUpdate = () => {
+    this.apUpdate = () => { 
       this.arpeggio =
         this.AP.patterns[this.ap_pattern_type][this.ap_pattern_id];
     };
     this.apUpdate();
   }
-
+  
   _utilClassToggle(el, classname) {
     const curr = document.querySelectorAll("." + classname);
     for (let i = 0; i < curr.length; i++) curr[i].classList.remove(classname);
     el.classList.add(classname);
   }
-
+  
   /**  
   utilActiveNoteClassToggle
   removes all classnames on existing, then adds to an array of note classes
@@ -1046,7 +1050,7 @@ class ArpPlayer {
     );
     for (let a = 0; a < adds.length; a++) adds[a].classList.add(classname);
   };
-
+  
   _loadProgressionSelector() {
     const progression_container = document.createElement("section");
     progression_container.classList.add("progressions");
@@ -1054,7 +1058,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Chord Progression Style";
     progression_container.appendChild(title);
-
+    
     Object.keys(this.progressions).forEach((prog_name) => {
       const el = document.createElement("div");
       el.setAttribute("data-value", prog_name);
@@ -1067,7 +1071,7 @@ class ArpPlayer {
       progression_container.appendChild(el);
     });
   }
-
+  
   _loadChordStyleSelector() {
     const chord_style_container = document.createElement("section");
     chord_style_container.classList.add("chord-style");
@@ -1075,7 +1079,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Chord Style";
     chord_style_container.appendChild(title);
-
+    
     const styles = [
       { key: "arpeggiated", label: "Arpeggiated" },
       { key: "block_chords", label: "Block Chords" },
@@ -1093,7 +1097,7 @@ class ArpPlayer {
       chord_style_container.appendChild(el);
     });
   }
-
+  
   _loadSongComposer() {
     const song_container = document.createElement("section");
     song_container.classList.add("song-composer");
@@ -1101,7 +1105,7 @@ class ArpPlayer {
     const title = document.createElement("h1");
     title.innerHTML = "Song Structure";
     song_container.appendChild(title);
-
+    
     Object.keys(this.song_presets).forEach((preset_key) => {
       const preset = this.song_presets[preset_key];
       const el = document.createElement("div");
@@ -1115,23 +1119,14 @@ class ArpPlayer {
       song_container.appendChild(el);
     });
   }
+  
 
-  _loadRandomizer() {
-    // Create randomizer button
-    this.randomizer_button = document.createElement("button");
-    this.randomizer_button.innerHTML = "🎲 Randomize All";
-    this.randomizer_button.classList.add("randomizer");
-    this.randomizer_button.addEventListener("click", () => {
-      this.randomizeAll();
-    });
-    this.aside.appendChild(this.randomizer_button);
-  }
-
+  
   updateChordStyle(e) {
     this._utilClassToggle(e.target, "chord-style-current");
     this.chord_style = e.target.getAttribute("data-value");
   }
-
+  
   updateSongPreset(e) {
     this._utilClassToggle(e.target, "song-preset-current");
     this.current_song_preset = e.target.getAttribute("data-value");
@@ -1141,18 +1136,18 @@ class ArpPlayer {
     this.current_section = 0;
     this.section_step = 0;
   }
-
+  
   randomizeAll() {
     // Show brief animation
     this.randomizer_button.innerHTML = "🔄 Randomizing...";
     this.randomizer_button.disabled = true;
-
+    
     setTimeout(() => {
       try {
-        // Randomize key
-        const keys = Object.keys(this.noteToMidi);
-        const randomKey = keys[Math.floor(Math.random() * keys.length)];
-        this.ms_key = randomKey;
+      // Randomize key
+      const keys = Object.keys(this.noteToMidi);
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      this.ms_key = randomKey;
         document
           .querySelectorAll(".keys div")
           .forEach((el) => el.classList.remove("key-current"));
@@ -1160,11 +1155,11 @@ class ArpPlayer {
           `.keys div[data-value="${randomKey}"]`,
         );
         if (keyElement) keyElement.classList.add("key-current");
-
-        // Randomize mode
-        const modes = this.MS.dict.modes;
-        const randomMode = modes[Math.floor(Math.random() * modes.length)];
-        this.ms_mode = randomMode;
+      
+      // Randomize mode
+      const modes = this.MS.dict.modes;
+      const randomMode = modes[Math.floor(Math.random() * modes.length)];
+      this.ms_mode = randomMode;
         document
           .querySelectorAll(".modes div")
           .forEach((el) => el.classList.remove("mode-current"));
@@ -1172,14 +1167,14 @@ class ArpPlayer {
           `.modes div[data-value="${randomMode}"]`,
         );
         if (modeElement) modeElement.classList.add("mode-current");
-
-        // Randomize progression
-        const progressions = Object.keys(this.progressions);
+      
+      // Randomize progression
+      const progressions = Object.keys(this.progressions);
         const randomProgression =
           progressions[Math.floor(Math.random() * progressions.length)];
-        this.current_progression = randomProgression;
-        this.chords = this.progressions[randomProgression];
-        this.chord_count = this.chords.length;
+      this.current_progression = randomProgression;
+      this.chords = this.progressions[randomProgression];
+      this.chord_count = this.chords.length;
         document
           .querySelectorAll(".progressions div")
           .forEach((el) => el.classList.remove("progression-current"));
@@ -1188,12 +1183,12 @@ class ArpPlayer {
         );
         if (progressionElement)
           progressionElement.classList.add("progression-current");
-
-        // Randomize chord style
+      
+      // Randomize chord style
         const chordStyles = ["arpeggiated", "block_chords"];
         const randomChordStyle =
           chordStyles[Math.floor(Math.random() * chordStyles.length)];
-        this.chord_style = randomChordStyle;
+      this.chord_style = randomChordStyle;
         document
           .querySelectorAll(".chord-style div")
           .forEach((el) => el.classList.remove("chord-style-current"));
@@ -1202,13 +1197,13 @@ class ArpPlayer {
         );
         if (chordStyleElement)
           chordStyleElement.classList.add("chord-style-current");
-
-        // Randomize song preset
-        const presets = Object.keys(this.song_presets);
+      
+      // Randomize song preset
+      const presets = Object.keys(this.song_presets);
         const randomPreset =
           presets[Math.floor(Math.random() * presets.length)];
-        this.current_song_preset = randomPreset;
-        this.composition_structure = this.song_presets[randomPreset].structure;
+      this.current_song_preset = randomPreset;
+      this.composition_structure = this.song_presets[randomPreset].structure;
         document
           .querySelectorAll(".song-composer div")
           .forEach((el) => el.classList.remove("song-preset-current"));
@@ -1216,11 +1211,11 @@ class ArpPlayer {
           `.song-composer div[data-value="${randomPreset}"]`,
         );
         if (presetElement) presetElement.classList.add("song-preset-current");
-
-        // Randomize BPM
-        const bpms = [60, 80, 100, 120, 140, 160];
-        const randomBPM = bpms[Math.floor(Math.random() * bpms.length)];
-        this.player.bpm = randomBPM;
+      
+      // Randomize BPM
+      const bpms = [60, 80, 100, 120, 140, 160];
+      const randomBPM = bpms[Math.floor(Math.random() * bpms.length)];
+      this.player.bpm = randomBPM;
         Tone.Transport.bpm.value = this.player.bpm; // Update actual BPM
         document
           .querySelectorAll(".bpm div")
@@ -1229,11 +1224,11 @@ class ArpPlayer {
           `.bpm div[data-value="${randomBPM}"]`,
         );
         if (bpmElement) bpmElement.classList.add("bpm-current");
-
-        // Randomize arpeggio steps
-        const steps = [3, 4, 5, 6];
-        const randomSteps = steps[Math.floor(Math.random() * steps.length)];
-        this.ap_steps = randomSteps;
+      
+      // Randomize arpeggio steps
+      const steps = [3, 4, 5, 6];
+      const randomSteps = steps[Math.floor(Math.random() * steps.length)];
+      this.ap_steps = randomSteps;
         document
           .querySelectorAll(".steps div")
           .forEach((el) => el.classList.remove("step-current"));
@@ -1241,11 +1236,11 @@ class ArpPlayer {
           `.steps div[data-value="${randomSteps}"]`,
         );
         if (stepsElement) stepsElement.classList.add("step-current");
-
-        // Randomize pattern type
+      
+      // Randomize pattern type
         const types = ["straight", "looped"];
-        const randomType = types[Math.floor(Math.random() * types.length)];
-        this.ap_pattern_type = randomType;
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      this.ap_pattern_type = randomType;
         document
           .querySelectorAll(".type div")
           .forEach((el) => el.classList.remove("type-current"));
@@ -1253,403 +1248,31 @@ class ArpPlayer {
           `.type div[data-value="${randomType}"]`,
         );
         if (typeElement) typeElement.classList.add("type-current");
-
-        // Update everything
-        this.msUpdateScale();
-        this.AP.updatePatterns({ steps: this.ap_steps });
-        this.apUpdate();
-        this._updatePatternSelector();
-        this._updateChordSelector();
-        this._updateOutput();
-
-        // Reset section progress
-        this.current_section = 0;
-        this.section_step = 0;
+      
+      // Update everything
+      this.msUpdateScale();
+      this.AP.updatePatterns({ steps: this.ap_steps });
+      this.apUpdate();
+      this._updatePatternSelector();
+      this._updateChordSelector();
+      this._updateOutput();
+      
+      // Reset section progress
+      this.current_section = 0;
+      this.section_step = 0;
       } catch (error) {
         console.error("Error during randomization:", error);
       } finally {
         // Always reset button, even if there's an error
         this.randomizer_button.innerHTML = "🎲 Randomize All";
-        this.randomizer_button.disabled = false;
+      this.randomizer_button.disabled = false;
       }
     }, 300); // Reduced timeout for snappier feel
   }
+  
 
-  _loadMIDIControls() {
-    // Create Export App State button (new primary export)
-    this.export_state_button = document.createElement("button");
-    this.export_state_button.innerHTML = "Export App State";
-    this.export_state_button.classList.add("midi-export");
-    this.export_state_button.addEventListener("click", () => {
-      this.exportAppState();
-    });
-    this.aside.appendChild(this.export_state_button);
 
-    // Create Claude's Song split button container
-    this.claude_song_container = document.createElement("div");
-    this.claude_song_container.style.position = "relative";
-    this.claude_song_container.style.width = "calc(90% - 1rem)";
-    this.claude_song_container.style.maxWidth = "280px";
-    this.claude_song_container.style.margin = "0.5rem auto";
-    this.claude_song_container.style.transform = "translateX(0.5rem)";
-    this.claude_song_container.style.display = "flex";
-    this.claude_song_container.style.flexDirection = "row";
-    this.claude_song_container.style.zIndex = "100";
 
-    // Main button - Preview
-    this.claude_preview_button = document.createElement("button");
-    this.claude_preview_button.innerHTML = "🎼 Voice of AI";
-    this.claude_preview_button.classList.add("midi-export", "claude-preview");
-    this.claude_preview_button.style.background = "#2c3e50";
-    this.claude_preview_button.style.borderColor = "#34495e";
-    this.claude_preview_button.style.flex = "1";
-    this.claude_preview_button.style.margin = "0";
-    this.claude_preview_button.style.borderRadius = "4px 0 0 4px";
-    this.claude_preview_button.style.transform = "none";
-    this.claude_preview_button.style.borderRight = "none";
-    this.claude_preview_button.style.minWidth = "0";
-    this.claude_preview_button.addEventListener("click", () => {
-      this.previewClaudeSong();
-    });
-
-    // Dropdown button
-    this.claude_dropdown_button = document.createElement("button");
-    this.claude_dropdown_button.innerHTML = "▼";
-    this.claude_dropdown_button.classList.add("midi-export", "claude-dropdown");
-    this.claude_dropdown_button.style.background = "#34495e";
-    this.claude_dropdown_button.style.borderColor = "#34495e";
-    this.claude_dropdown_button.style.width = "30px";
-    this.claude_dropdown_button.style.flexShrink = "0";
-    this.claude_dropdown_button.style.margin = "0";
-    this.claude_dropdown_button.style.borderRadius = "0 4px 4px 0";
-    this.claude_dropdown_button.style.borderLeft = "1px solid #2c3e50";
-    this.claude_dropdown_button.style.transform = "none";
-    this.claude_dropdown_button.style.fontSize = "0.8rem";
-    this.claude_dropdown_button.style.padding = "0";
-    this.claude_dropdown_button.addEventListener("click", () => {
-      this.toggleClaudeDropdown();
-    });
-
-    // Dropdown menu
-    this.claude_dropdown_menu = document.createElement("div");
-    this.claude_dropdown_menu.classList.add("claude-dropdown-menu");
-    this.claude_dropdown_menu.style.position = "absolute";
-    this.claude_dropdown_menu.style.top = "100%";
-    this.claude_dropdown_menu.style.left = "0";
-    this.claude_dropdown_menu.style.width = "100%";
-    this.claude_dropdown_menu.style.display = "none";
-    this.claude_dropdown_menu.style.zIndex = "9999";
-    this.claude_dropdown_menu.style.marginTop = "2px";
-
-    // Export option
-    this.claude_export_option = document.createElement("div");
-    this.claude_export_option.classList.add("claude-dropdown-option");
-    this.claude_export_option.innerHTML = "💾 Export Voice of AI";
-    this.claude_export_option.addEventListener("click", () => {
-      this.generateClaudeSong();
-      this.claude_dropdown_menu.style.display = "none";
-    });
-
-    // New composition option
-    this.claude_new_option = document.createElement("div");
-    this.claude_new_option.classList.add("claude-dropdown-option");
-    this.claude_new_option.innerHTML = "🎲 New Voice of AI";
-    this.claude_new_option.addEventListener("click", () => {
-      this.generateNewClaudeSong();
-      this.claude_dropdown_menu.style.display = "none";
-    });
-
-    // Assemble the split button
-    this.claude_dropdown_menu.appendChild(this.claude_export_option);
-    this.claude_dropdown_menu.appendChild(this.claude_new_option);
-    this.claude_song_container.appendChild(this.claude_preview_button);
-    this.claude_song_container.appendChild(this.claude_dropdown_button);
-    this.claude_song_container.appendChild(this.claude_dropdown_menu);
-    this.aside.appendChild(this.claude_song_container);
-
-    // Close dropdown when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!this.claude_song_container.contains(e.target)) {
-        this.claude_dropdown_menu.style.display = "none";
-        this.claude_dropdown_button.innerHTML = "▼"; // Reset arrow
-      }
-    });
-
-    // Also close dropdown when pressing escape
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        this.claude_dropdown_menu.style.display = "none";
-        this.claude_dropdown_button.innerHTML = "▼"; // Reset arrow
-      }
-    });
-
-    // Create MIDI export button (legacy/alternative)
-    this.midi_button = document.createElement("button");
-    this.midi_button.innerHTML = "Generate Preset MIDI";
-    this.midi_button.classList.add("midi-export");
-    this.midi_button.addEventListener("click", () => {
-      this.generateMIDI();
-    });
-    this.aside.appendChild(this.midi_button);
-
-    // Add progress indicator
-    this.progress_info = document.createElement("div");
-    this.progress_info.classList.add("progress-info");
-    this.progress_info.innerHTML =
-      "<h3>Exporting MIDI...</h3><p>This may take a few seconds</p>";
-    this.progress_info.style.display = "none";
-    this.aside.appendChild(this.progress_info);
-  }
-
-  _loadBestHitsPlayer() {
-    // Define available songs (these would need to be uploaded to a 'songs' directory)
-    this.bestHitsSongs = [
-      { file: "songs/Claude3.mp3", title: "Claude3", artist: "Musitron AI" },
-      { file: "songs/Claude4.mp3", title: "Claude4", artist: "Musitron AI" },
-      { file: "songs/Project1.mp3", title: "Project1", artist: "Studio Mix" },
-      { file: "songs/Project2.mp3", title: "Project2", artist: "Studio Mix" }
-    ];
-
-    // Create HTML5 audio element
-    this.mp3Player = document.createElement("audio");
-    this.mp3Player.preload = "none";
-    this.currentSongIndex = -1;
-
-    // Create Best Hits section container
-    const bestHitsSection = document.createElement("section");
-    bestHitsSection.classList.add("best-hits-section");
-
-    const title = document.createElement("h1");
-    title.textContent = "Best Hits";
-    bestHitsSection.appendChild(title);
-
-    // Create Best Hits button container with dropdown
-    this.bestHits_container = document.createElement("div");
-    this.bestHits_container.style.position = "relative";
-    this.bestHits_container.style.display = "flex";
-    this.bestHits_container.style.width = "calc(90% - 1rem)";
-    this.bestHits_container.style.maxWidth = "280px";
-    this.bestHits_container.style.margin = "1rem auto";
-    this.bestHits_container.style.transform = "translateX(0.5rem)";
-
-    // Main Best Hits button
-    this.bestHits_button = document.createElement("button");
-    this.bestHits_button.innerHTML = '<span class="play">🎵 Best Hits</span><span class="pause">⏸ Pause</span>';
-    this.bestHits_button.classList.add("midi-export", "best-hits");
-    this.bestHits_button.style.borderRadius = "4px 0 0 4px";
-    this.bestHits_button.style.margin = "0";
-    this.bestHits_button.style.width = "calc(100% - 30px)";
-    this.bestHits_button.addEventListener("click", () => {
-      this.toggleBestHitsPlayback();
-    });
-
-    // Dropdown button
-    this.bestHits_dropdown_button = document.createElement("button");
-    this.bestHits_dropdown_button.innerHTML = "▼";
-    this.bestHits_dropdown_button.classList.add("midi-export", "best-hits-dropdown");
-    this.bestHits_dropdown_button.style.background = "#229954";
-    this.bestHits_dropdown_button.style.borderColor = "#229954";
-    this.bestHits_dropdown_button.style.width = "30px";
-    this.bestHits_dropdown_button.style.flexShrink = "0";
-    this.bestHits_dropdown_button.style.margin = "0";
-    this.bestHits_dropdown_button.style.borderRadius = "0 4px 4px 0";
-    this.bestHits_dropdown_button.style.borderLeft = "1px solid #1e8449";
-    this.bestHits_dropdown_button.style.transform = "none";
-    this.bestHits_dropdown_button.style.fontSize = "0.8rem";
-    this.bestHits_dropdown_button.style.padding = "0";
-    this.bestHits_dropdown_button.addEventListener("click", () => {
-      this.toggleBestHitsDropdown();
-    });
-
-    // Create dropdown menu
-    this.bestHits_dropdown_menu = document.createElement("div");
-    this.bestHits_dropdown_menu.classList.add("best-hits-dropdown-menu");
-    this.bestHits_dropdown_menu.style.position = "absolute";
-    this.bestHits_dropdown_menu.style.top = "100%";
-    this.bestHits_dropdown_menu.style.left = "0";
-    this.bestHits_dropdown_menu.style.width = "100%";
-    this.bestHits_dropdown_menu.style.display = "none";
-    this.bestHits_dropdown_menu.style.zIndex = "9999";
-    this.bestHits_dropdown_menu.style.marginTop = "2px";
-
-    // Add song options to dropdown
-    this.bestHitsSongs.forEach((song, index) => {
-      const option = document.createElement("div");
-      option.classList.add("best-hits-dropdown-option");
-      option.innerHTML = `
-        <span>${song.title}</span>
-        <span class="play-status"></span>
-      `;
-      option.addEventListener("click", () => {
-        this.selectBestHitsSong(index);
-        this.bestHits_dropdown_menu.style.display = "none";
-        this.bestHits_dropdown_button.innerHTML = "▼";
-      });
-      this.bestHits_dropdown_menu.appendChild(option);
-    });
-
-    // Assemble the container
-    this.bestHits_container.appendChild(this.bestHits_button);
-    this.bestHits_container.appendChild(this.bestHits_dropdown_button);
-    this.bestHits_container.appendChild(this.bestHits_dropdown_menu);
-
-    // Create audio player info display
-    this.audioPlayerInfo = document.createElement("div");
-    this.audioPlayerInfo.classList.add("audio-player-info");
-    this.audioPlayerInfo.innerHTML = `
-      <div class="song-title"></div>
-      <div class="controls">
-        <span class="time-display">0:00 / 0:00</span>
-        <button onclick="app.stopBestHits()" style="background: none; border: none; color: white; cursor: pointer; font-size: 0.8rem;">Stop</button>
-      </div>
-    `;
-
-    bestHitsSection.appendChild(this.bestHits_container);
-    bestHitsSection.appendChild(this.audioPlayerInfo);
-
-    // Add to aside
-    this.aside.appendChild(bestHitsSection);
-
-    // Audio event listeners
-    this.mp3Player.addEventListener("loadstart", () => {
-      this.updateAudioPlayerInfo("Loading...");
-    });
-
-    this.mp3Player.addEventListener("canplay", () => {
-      this.updateAudioPlayerInfo();
-    });
-
-    this.mp3Player.addEventListener("play", () => {
-      this.audioPlayerInfo.classList.add("playing");
-      this.bestHits_button.classList.add("active");
-      this.updateDropdownPlayStatus();
-      
-      // Pause the Tone.js generator if it's playing
-      if (this.player.playing) {
-        this.pause();
-      }
-    });
-
-    this.mp3Player.addEventListener("pause", () => {
-      this.audioPlayerInfo.classList.remove("playing");
-      this.bestHits_button.classList.remove("active");
-      this.updateDropdownPlayStatus();
-    });
-
-    this.mp3Player.addEventListener("ended", () => {
-      this.stopBestHits();
-    });
-
-    this.mp3Player.addEventListener("timeupdate", () => {
-      this.updateAudioPlayerInfo();
-    });
-
-    this.mp3Player.addEventListener("error", (e) => {
-      console.error("Audio playback error:", e);
-      this.updateAudioPlayerInfo("Error loading audio");
-      this.stopBestHits();
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener("click", (e) => {
-      if (!this.bestHits_container.contains(e.target)) {
-        this.bestHits_dropdown_menu.style.display = "none";
-        this.bestHits_dropdown_button.innerHTML = "▼";
-      }
-    });
-  }
-
-  toggleBestHitsDropdown() {
-    const isVisible = this.bestHits_dropdown_menu.style.display === "block";
-    this.bestHits_dropdown_menu.style.display = isVisible ? "none" : "block";
-    this.bestHits_dropdown_button.innerHTML = isVisible ? "▼" : "▲";
-  }
-
-  selectBestHitsSong(index) {
-    this.currentSongIndex = index;
-    const song = this.bestHitsSongs[index];
-    
-    // Stop current playback
-    if (!this.mp3Player.paused) {
-      this.mp3Player.pause();
-    }
-    
-    // Load new song
-    this.mp3Player.src = song.file;
-    this.updateAudioPlayerInfo(`Loading ${song.title}...`);
-    
-    // Start playback
-    this.mp3Player.play().catch(error => {
-      console.error("Playback failed:", error);
-      this.updateAudioPlayerInfo("Playback failed - check if file exists");
-    });
-  }
-
-  toggleBestHitsPlayback() {
-    if (this.currentSongIndex === -1) {
-      // No song selected, play first one
-      this.selectBestHitsSong(0);
-    } else {
-      // Toggle current song
-      if (this.mp3Player.paused) {
-        this.mp3Player.play().catch(error => {
-          console.error("Playback failed:", error);
-          this.updateAudioPlayerInfo("Playback failed");
-        });
-      } else {
-        this.mp3Player.pause();
-      }
-    }
-  }
-
-  stopBestHits() {
-    this.mp3Player.pause();
-    this.mp3Player.currentTime = 0;
-    this.audioPlayerInfo.classList.remove("playing");
-    this.bestHits_button.classList.remove("active");
-    this.updateDropdownPlayStatus();
-  }
-
-  updateAudioPlayerInfo(message = null) {
-    const titleEl = this.audioPlayerInfo.querySelector(".song-title");
-    const timeEl = this.audioPlayerInfo.querySelector(".time-display");
-    
-    if (message) {
-      titleEl.textContent = message;
-      timeEl.textContent = "";
-      return;
-    }
-
-    if (this.currentSongIndex >= 0) {
-      const song = this.bestHitsSongs[this.currentSongIndex];
-      titleEl.textContent = `${song.title} - ${song.artist}`;
-      
-      const current = this.formatTime(this.mp3Player.currentTime);
-      const duration = this.formatTime(this.mp3Player.duration);
-      timeEl.textContent = `${current} / ${duration}`;
-    }
-  }
-
-  updateDropdownPlayStatus() {
-    const options = this.bestHits_dropdown_menu.querySelectorAll(".best-hits-dropdown-option");
-    options.forEach((option, index) => {
-      const statusEl = option.querySelector(".play-status");
-      if (index === this.currentSongIndex && !this.mp3Player.paused) {
-        option.classList.add("playing");
-        statusEl.textContent = "♪";
-      } else {
-        option.classList.remove("playing");
-        statusEl.textContent = "";
-      }
-    });
-  }
-
-  formatTime(seconds) {
-    if (isNaN(seconds)) return "0:00";
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  }
 
   exportAppState() {
     this.progress_info.style.display = "block";
@@ -1932,11 +1555,11 @@ class ArpPlayer {
       this.claude_export_option.style.opacity = "1";
     }, 100);
   }
-
+  
   generateMIDI() {
     this.progress_info.style.display = "block";
     this.midi_button.disabled = true;
-
+    
     // Small delay to show progress indicator
     setTimeout(() => {
       const midiData = this.createMIDIComposition();
@@ -2170,13 +1793,13 @@ class ArpPlayer {
 
     return this.createMIDIFile(tracks, ticksPerQuarter);
   }
-
+  
   createMIDIComposition() {
     const ticksPerQuarter = this.midi_config.ticksPerQuarter;
     const beatsPerSecond = this.player.bpm / 60;
     const ticksPerSecond = ticksPerQuarter * beatsPerSecond;
     const sixteenthNoteTicks = ticksPerQuarter / 4;
-
+    
     // MIDI tracks: 0=Lead, 1=Harmony, 2=Bass, 3=Texture
     const tracks = [[], [], [], []];
 
@@ -2186,19 +1809,19 @@ class ArpPlayer {
     const chordInversions = this.createRandomChordInversions();
     const rhythmVariations = this.createRandomRhythmVariations();
     const textureChoices = this.createRandomTextureChoices();
-
+    
     let currentTime = 0;
     let step = 0;
     let midiSectionStep = 0;
     let midiCurrentSection = 0;
     let lastChordIndex = -1;
-
+    
     while (currentTime < this.midi_config.duration) {
       const currentSection =
         this.composition_structure[
           midiCurrentSection % this.composition_structure.length
         ];
-
+      
       if (currentSection && currentSection.layers > 0) {
         // RANDOM CHORD PROGRESSION - Mix up the order sometimes
         const baseChordChangeInterval =
@@ -2221,10 +1844,10 @@ class ArpPlayer {
         const scaleIndex = this.chords[actualChordIndex];
         const chord = this.MS.notes[scaleIndex];
         const scale = this.getMIDIScale();
-
+        
         const stepInMeasure = step % 16;
         const midiTime = Math.floor(currentTime * ticksPerSecond);
-
+        
         // RANDOM TIMING VARIATIONS - Add subtle swing and humanization
         const timingVariation =
           (Math.random() - 0.5) * (sixteenthNoteTicks * 0.1); // ±10% timing variation
@@ -2273,11 +1896,11 @@ class ArpPlayer {
           (midiCurrentSection + 1) % this.composition_structure.length;
         midiSectionStep = 0;
       }
-
+      
       currentTime += 1 / (beatsPerSecond * 4); // 16th note duration
       step++;
     }
-
+    
     return this.createMIDIFile(tracks, ticksPerQuarter);
   }
 
@@ -2608,7 +2231,7 @@ class ArpPlayer {
 
     return Math.max(2, interval); // Minimum interval of 2
   }
-
+  
   getCurrentMIDISectionAt(time) {
     // Map time to our composition structure
     let totalTime = 0;
@@ -2622,7 +2245,7 @@ class ArpPlayer {
     // If beyond structure, return finale section
     return this.composition_structure[this.composition_structure.length - 1];
   }
-
+  
   getMIDIScale() {
     const keyIndex = this.noteToMidi[this.ms_key];
     const scaleIntervals = this.MS._scale.steps.map(
@@ -2630,7 +2253,7 @@ class ArpPlayer {
     );
     return scaleIntervals;
   }
-
+  
   getMIDIChord(scaleIndex) {
     const scale = this.getMIDIScale();
     return [
@@ -2874,18 +2497,18 @@ class ArpPlayer {
     const quarterNote = duration * 4;
     const eighthNote = duration * 2;
     const halfNote = duration * 8;
-
+    
     // Get velocity from the same function used in real-time
     const velocity = Math.floor(
       this.getDynamicVelocity(section, globalStep) * 127,
     );
-
+    
     // Use actual arpeggio pattern and variations like the live app
     const pattern_variation = this.getPatternVariation(section, globalStep);
     const arpeggio_index =
       (globalStep + pattern_variation) % this.arpeggio.length;
     const arpeggio_note_index = this.arpeggio[arpeggio_index];
-
+    
     // Build notes array like in live app
     let notes = chord.triad.notes;
     const pattern_multiplier = section.layers;
@@ -2900,7 +2523,7 @@ class ArpPlayer {
         }),
       );
     }
-
+    
     // TRACK 2: BASS - Always present when shouldPlayBass returns true
     if (
       this.shouldPlayBass(section) &&
@@ -2919,7 +2542,7 @@ class ArpPlayer {
 
     if (this.chord_style === "block_chords" && section.layers > 1) {
       // BLOCK CHORD STYLE - Distribute across 4 tracks
-
+      
       // TRACK 0: Lead block chords (main rhythm)
       if (stepInMeasure % 4 === 0) {
         chord.triad.notes.forEach((chordNote, i) => {
@@ -2935,7 +2558,7 @@ class ArpPlayer {
           );
         });
       }
-
+      
       // TRACK 1: Harmony block chords (offset rhythm for richness)
       if (stepInMeasure % 6 === 0) {
         chord.triad.notes.forEach((chordNote, i) => {
@@ -2951,7 +2574,7 @@ class ArpPlayer {
           );
         });
       }
-
+      
       // TRACK 3: Texture layer (higher octave, more sparse)
       if (stepInMeasure % 8 === 0 && section.layers >= 3) {
         chord.triad.notes.forEach((chordNote, i) => {
@@ -2969,7 +2592,7 @@ class ArpPlayer {
       }
     } else {
       // ARPEGGIATED STYLE - Use your actual arpeggio patterns
-
+      
       // TRACK 0: Lead arpeggio (main pattern)
       if (arpeggio_note_index < notes.length) {
         const selectedNote = notes[arpeggio_note_index];
@@ -2978,7 +2601,7 @@ class ArpPlayer {
           (selectedNote.rel_octave + this.player.octave_base) * 12;
         this.addMIDINote(tracks[0], leadNote, midiTime, duration * 2, velocity);
       }
-
+      
       // TRACK 1: Harmony chords (support the arpeggio)
       if (section.layers >= 2 && stepInMeasure % 4 === 0) {
         chord.triad.notes.forEach((chordNote, i) => {
@@ -2994,7 +2617,7 @@ class ArpPlayer {
           );
         });
       }
-
+      
       // TRACK 3: Texture layer (counter-melodies and fills)
       if (section.layers >= 3 && stepInMeasure % 6 === 0) {
         // Use a different note from the arpeggio for counterpoint
@@ -3013,7 +2636,7 @@ class ArpPlayer {
           );
         }
       }
-
+      
       // Additional texture for complexity sections
       if (section.name === "complexity" && stepInMeasure % 3 === 0) {
         const complexityIndex = (arpeggio_note_index + 1) % notes.length;
@@ -3032,7 +2655,7 @@ class ArpPlayer {
         }
       }
     }
-
+    
     // TRACK 1: Additional harmonic support for all styles during peak sections
     if (section.name === "complexity" && stepInMeasure % 12 === 0) {
       const rootMidi =
@@ -3047,7 +2670,7 @@ class ArpPlayer {
       );
     }
   }
-
+  
   addMIDINote(track, pitch, startTime, duration, velocity) {
     track.push({
       type: "noteOn",
@@ -3062,11 +2685,11 @@ class ArpPlayer {
       velocity: 0,
     });
   }
-
+  
   createMIDIFile(tracks, ticksPerQuarter) {
     // Simple MIDI file creation
     const trackData = tracks.map((track) => this.createMIDITrack(track));
-
+    
     // MIDI header
     const header = new Uint8Array([
       0x4d,
@@ -3084,32 +2707,32 @@ class ArpPlayer {
       (ticksPerQuarter >> 8) & 0xff,
       ticksPerQuarter & 0xff, // Ticks per quarter
     ]);
-
+    
     // Combine header and tracks
     let totalLength = header.length;
     trackData.forEach((track) => (totalLength += track.length));
-
+    
     const midiFile = new Uint8Array(totalLength);
     let offset = 0;
-
+    
     midiFile.set(header, offset);
     offset += header.length;
-
+    
     trackData.forEach((track) => {
       midiFile.set(track, offset);
       offset += track.length;
     });
-
+    
     return midiFile;
   }
-
+  
   createMIDITrack(events) {
     // Sort events by time
     events.sort((a, b) => a.time - b.time);
-
+    
     const trackEvents = [];
     let lastTime = 0;
-
+    
     // Add tempo event at the beginning
     trackEvents.push(0x00); // Delta time
     trackEvents.push(0xff, 0x51, 0x03); // Tempo meta event
@@ -3123,24 +2746,24 @@ class ArpPlayer {
     events.forEach((event) => {
       const deltaTime = event.time - lastTime;
       lastTime = event.time;
-
+      
       // Add variable-length delta time
       this.writeVariableLength(trackEvents, Math.max(0, Math.floor(deltaTime)));
-
+      
       if (event.type === "noteOn") {
         trackEvents.push(0x90, event.pitch, event.velocity); // Note on, channel 0
       } else if (event.type === "noteOff") {
         trackEvents.push(0x80, event.pitch, event.velocity); // Note off, channel 0
       }
     });
-
+    
     // End of track
     trackEvents.push(0x00, 0xff, 0x2f, 0x00);
-
+    
     // Create track chunk
     const trackChunk = new Uint8Array(8 + trackEvents.length);
     trackChunk.set([0x4d, 0x54, 0x72, 0x6b], 0); // "MTrk"
-
+    
     const length = trackEvents.length;
     trackChunk.set(
       [
@@ -3151,32 +2774,32 @@ class ArpPlayer {
       ],
       4,
     );
-
+    
     trackChunk.set(trackEvents, 8);
-
+    
     return trackChunk;
   }
-
+  
   writeVariableLength(buffer, value) {
     const bytes = [];
     bytes.push(value & 0x7f);
     value >>= 7;
-
+    
     while (value > 0) {
       bytes.push((value & 0x7f) | 0x80);
       value >>= 7;
     }
-
+    
     // Reverse and add to buffer
     for (let i = bytes.length - 1; i >= 0; i--) {
       buffer.push(bytes[i]);
     }
   }
-
+  
   downloadMIDI(midiData, exportType = "app_state") {
     const blob = new Blob([midiData], { type: "audio/midi" });
     const url = URL.createObjectURL(blob);
-
+    
     // Create descriptive filename with all current settings
     const chordStyleShort =
       this.chord_style === "block_chords" ? "block" : "arp";
@@ -3214,10 +2837,10 @@ class ArpPlayer {
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
-
+    
     URL.revokeObjectURL(url);
   }
-
+  
   updateProgression(e) {
     this._utilClassToggle(e.target, "progression-current");
     this.current_progression = e.target.getAttribute("data-value");
@@ -3226,18 +2849,18 @@ class ArpPlayer {
     this._updateOutput();
     this._updateChordSelector();
   }
-
+  
   _updateChordSelector() {
     // Remove old chord selector and rebuild
     const old_selector = document.querySelector(".chord");
     if (old_selector) old_selector.remove();
     this._loadChordSelector();
   }
-
+  
   getCurrentSection() {
     return this.composition_structure[this.current_section];
   }
-
+  
   getPatternVariation(section, step) {
     // Add subtle pattern variations based on Philip Glass techniques
     switch (section.name) {
@@ -3255,7 +2878,7 @@ class ArpPlayer {
         return 0;
     }
   }
-
+  
   shouldPlayBass(section) {
     // Determine when to play bass based on section
     switch (section.name) {
@@ -3273,7 +2896,7 @@ class ArpPlayer {
         return this.player.step % 4 === 0;
     }
   }
-
+  
   getChordChangeInterval(section) {
     // Vary chord change timing based on section
     switch (section.name) {
@@ -3291,7 +2914,7 @@ class ArpPlayer {
         return this.arpeggio.length * this.player.arp_repeat;
     }
   }
-
+  
   getDynamicVelocity(section, step) {
     // Create dynamic expression based on section and position
     const base_velocity = 0.7;
@@ -3302,13 +2925,596 @@ class ArpPlayer {
         complexity: 0.9,
         reduction: 0.6,
         finale: 0.8,
-      }[section.name] || 0.7;
-
+    }[section.name] || 0.7;
+    
     // Add subtle phrase-based dynamics
     const phrase_position = (step % 32) / 32; // 8-measure phrases
     const phrase_curve = Math.sin(phrase_position * Math.PI) * 0.2;
-
+    
     return Math.min(1.0, Math.max(0.1, section_modifier + phrase_curve));
+  }
+
+  _createButtonsSection() {
+    // Create buttons section
+    const buttonsSection = document.createElement("section");
+    buttonsSection.classList.add("buttons-section");
+    
+    const title = document.createElement("h1");
+    title.textContent = "Controls";
+    buttonsSection.appendChild(title);
+
+    // Create the randomizer button
+    this.randomizer_button = document.createElement("button");
+    this.randomizer_button.innerHTML = "🎲 Randomize All";
+    this.randomizer_button.classList.add("randomizer");
+    this.randomizer_button.addEventListener("click", () => {
+      this.randomizeAll();
+    });
+    buttonsSection.appendChild(this.randomizer_button);
+
+    // Create Export App State button
+    this.export_state_button = document.createElement("button");
+    this.export_state_button.innerHTML = "Export App State";
+    this.export_state_button.classList.add("midi-export");
+    this.export_state_button.addEventListener("click", () => {
+      this.exportAppState();
+    });
+    buttonsSection.appendChild(this.export_state_button);
+
+    // Create Claude's Song split button container
+    this.claude_song_container = document.createElement("div");
+    this.claude_song_container.style.position = "relative";
+    this.claude_song_container.style.width = "calc(90% - 1rem)";
+    this.claude_song_container.style.maxWidth = "280px";
+    this.claude_song_container.style.margin = "0.5rem auto";
+    this.claude_song_container.style.transform = "translateX(0.5rem)";
+    this.claude_song_container.style.display = "flex";
+    this.claude_song_container.style.flexDirection = "row";
+    this.claude_song_container.style.zIndex = "100";
+
+    // Main button - Preview
+    this.claude_preview_button = document.createElement("button");
+    this.claude_preview_button.innerHTML = "🎼 Voice of AI";
+    this.claude_preview_button.classList.add("midi-export", "claude-preview");
+    this.claude_preview_button.style.background = "#2c3e50";
+    this.claude_preview_button.style.borderColor = "#34495e";
+    this.claude_preview_button.style.flex = "1";
+    this.claude_preview_button.style.margin = "0";
+    this.claude_preview_button.style.borderRadius = "4px 0 0 4px";
+    this.claude_preview_button.style.transform = "none";
+    this.claude_preview_button.style.borderRight = "none";
+    this.claude_preview_button.style.minWidth = "0";
+    this.claude_preview_button.addEventListener("click", () => {
+      this.previewClaudeSong();
+    });
+
+    // Dropdown button
+    this.claude_dropdown_button = document.createElement("button");
+    this.claude_dropdown_button.innerHTML = "▼";
+    this.claude_dropdown_button.classList.add("midi-export", "claude-dropdown");
+    this.claude_dropdown_button.style.background = "#34495e";
+    this.claude_dropdown_button.style.borderColor = "#34495e";
+    this.claude_dropdown_button.style.width = "30px";
+    this.claude_dropdown_button.style.flexShrink = "0";
+    this.claude_dropdown_button.style.margin = "0";
+    this.claude_dropdown_button.style.borderRadius = "0 4px 4px 0";
+    this.claude_dropdown_button.style.borderLeft = "1px solid #2c3e50";
+    this.claude_dropdown_button.style.transform = "none";
+    this.claude_dropdown_button.style.fontSize = "0.8rem";
+    this.claude_dropdown_button.style.padding = "0";
+    this.claude_dropdown_button.addEventListener("click", () => {
+      this.toggleClaudeDropdown();
+    });
+
+    // Dropdown menu
+    this.claude_dropdown_menu = document.createElement("div");
+    this.claude_dropdown_menu.classList.add("claude-dropdown-menu");
+    this.claude_dropdown_menu.style.position = "absolute";
+    this.claude_dropdown_menu.style.top = "100%";
+    this.claude_dropdown_menu.style.left = "0";
+    this.claude_dropdown_menu.style.width = "100%";
+    this.claude_dropdown_menu.style.display = "none";
+    this.claude_dropdown_menu.style.zIndex = "9999";
+    this.claude_dropdown_menu.style.marginTop = "2px";
+
+    // Export option
+    this.claude_export_option = document.createElement("div");
+    this.claude_export_option.classList.add("claude-dropdown-option");
+    this.claude_export_option.innerHTML = "💾 Export Voice of AI";
+    this.claude_export_option.addEventListener("click", () => {
+      this.generateClaudeSong();
+      this.claude_dropdown_menu.style.display = "none";
+    });
+
+    // New composition option
+    this.claude_new_option = document.createElement("div");
+    this.claude_new_option.classList.add("claude-dropdown-option");
+    this.claude_new_option.innerHTML = "🎲 New Voice of AI";
+    this.claude_new_option.addEventListener("click", () => {
+      this.generateNewClaudeSong();
+      this.claude_dropdown_menu.style.display = "none";
+    });
+
+    // Assemble the split button
+    this.claude_dropdown_menu.appendChild(this.claude_export_option);
+    this.claude_dropdown_menu.appendChild(this.claude_new_option);
+    this.claude_song_container.appendChild(this.claude_preview_button);
+    this.claude_song_container.appendChild(this.claude_dropdown_button);
+    this.claude_song_container.appendChild(this.claude_dropdown_menu);
+    buttonsSection.appendChild(this.claude_song_container);
+
+    // Create MIDI export button (legacy/alternative)
+    this.midi_button = document.createElement("button");
+    this.midi_button.innerHTML = "Generate Preset MIDI";
+    this.midi_button.classList.add("midi-export");
+    this.midi_button.addEventListener("click", () => {
+      this.generateMIDI();
+    });
+    buttonsSection.appendChild(this.midi_button);
+    
+    // Add progress indicator
+    this.progress_info = document.createElement("div");
+    this.progress_info.classList.add("progress-info");
+    this.progress_info.innerHTML =
+      "<h3>Exporting MIDI...</h3><p>This may take a few seconds</p>";
+    this.progress_info.style.display = "none";
+    buttonsSection.appendChild(this.progress_info);
+
+    // Add buttons section to aside
+    this.aside.appendChild(buttonsSection);
+
+    // Create Best Hits section with pill-shaped player
+    this._createBestHitsSection();
+    
+    // Claude dropdown event listeners
+    document.addEventListener("click", (e) => {
+      if (!this.claude_song_container.contains(e.target)) {
+        this.claude_dropdown_menu.style.display = "none";
+        this.claude_dropdown_button.innerHTML = "▼";
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        this.claude_dropdown_menu.style.display = "none";
+        this.claude_dropdown_button.innerHTML = "▼";
+      }
+    });
+  }
+
+  _createBestHitsSection() {
+    // Define available songs
+    this.bestHitsSongs = [
+      { file: "songs/Claude3.mp3", title: "Claude3", artist: "Musitron AI" },
+      { file: "songs/Claude4.mp3", title: "Claude4", artist: "Musitron AI" },
+      { file: "songs/Project1.mp3", title: "Project1", artist: "Studio Mix" },
+      { file: "songs/Project2.mp3", title: "Project2", artist: "Studio Mix" }
+    ];
+
+    // Create HTML5 audio element
+    this.mp3Player = document.createElement("audio");
+    this.mp3Player.preload = "none";
+    this.currentSongIndex = -1;
+
+    // Create Best Hits section container
+    const bestHitsSection = document.createElement("section");
+    bestHitsSection.classList.add("best-hits-section");
+
+    const title = document.createElement("h1");
+    title.textContent = "Best Hits";
+    bestHitsSection.appendChild(title);
+
+    // Create Best Hits button container with dropdown
+    this.bestHits_container = document.createElement("div");
+    this.bestHits_container.style.position = "relative";
+    this.bestHits_container.style.display = "flex";
+    this.bestHits_container.style.width = "calc(90% - 1rem)";
+    this.bestHits_container.style.maxWidth = "280px";
+    this.bestHits_container.style.margin = "1rem auto";
+    this.bestHits_container.style.transform = "translateX(0.5rem)";
+    this.bestHits_container.style.zIndex = "1000";
+    this.bestHits_container.style.isolation = "isolate";
+
+    // Main Best Hits button
+    this.bestHits_button = document.createElement("button");
+    this.bestHits_button.innerHTML = '<span class="play">🎵 Best Hits</span><span class="pause">⏸ Pause</span>';
+    this.bestHits_button.classList.add("midi-export", "best-hits");
+    this.bestHits_button.style.borderRadius = "4px 0 0 4px";
+    this.bestHits_button.style.margin = "0";
+    this.bestHits_button.style.width = "calc(100% - 30px)";
+    this.bestHits_button.addEventListener("click", () => {
+      this.toggleBestHitsPlayback();
+    });
+
+    // Dropdown button
+    this.bestHits_dropdown_button = document.createElement("button");
+    this.bestHits_dropdown_button.innerHTML = "▼";
+    this.bestHits_dropdown_button.classList.add("midi-export", "best-hits-dropdown");
+    this.bestHits_dropdown_button.style.background = "#229954";
+    this.bestHits_dropdown_button.style.borderColor = "#229954";
+    this.bestHits_dropdown_button.style.width = "30px";
+    this.bestHits_dropdown_button.style.flexShrink = "0";
+    this.bestHits_dropdown_button.style.margin = "0";
+    this.bestHits_dropdown_button.style.borderRadius = "0 4px 4px 0";
+    this.bestHits_dropdown_button.style.borderLeft = "1px solid #1e8449";
+    this.bestHits_dropdown_button.style.transform = "none";
+    this.bestHits_dropdown_button.style.fontSize = "0.8rem";
+    this.bestHits_dropdown_button.style.padding = "0";
+    this.bestHits_dropdown_button.addEventListener("click", () => {
+      this.toggleBestHitsDropdown();
+    });
+
+    // Create dropdown menu with improved visibility and positioning
+    this.bestHits_dropdown_menu = document.createElement("div");
+    this.bestHits_dropdown_menu.classList.add("best-hits-dropdown-menu");
+    this.bestHits_dropdown_menu.style.position = "absolute";
+    this.bestHits_dropdown_menu.style.top = "100%";
+    this.bestHits_dropdown_menu.style.left = "0";
+    this.bestHits_dropdown_menu.style.width = "100%";
+    this.bestHits_dropdown_menu.style.display = "none";
+    this.bestHits_dropdown_menu.style.zIndex = "99999";
+    this.bestHits_dropdown_menu.style.marginTop = "2px";
+    this.bestHits_dropdown_menu.style.background = "#1e8449";
+    this.bestHits_dropdown_menu.style.border = "2px solid #16703e";
+    this.bestHits_dropdown_menu.style.borderRadius = "4px";
+    this.bestHits_dropdown_menu.style.boxShadow = "0px 8px 16px rgba(0, 0, 0, 0.4)";
+
+    // Add song options to dropdown with forced visibility
+    this.bestHitsSongs.forEach((song, index) => {
+      const option = document.createElement("div");
+      option.classList.add("best-hits-dropdown-option");
+      
+      // Force text visibility with inline styles
+      option.style.cssText = `
+        color: #ffffff !important;
+        font-weight: bold !important;
+        background: #1e8449 !important;
+        padding: 0.75rem 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        border-bottom: 1px solid #16703e !important;
+        cursor: pointer !important;
+      `;
+      
+      const titleSpan = document.createElement("span");
+      titleSpan.textContent = song.title;
+      titleSpan.style.cssText = "color: #ffffff !important; font-weight: bold !important;";
+      
+      const statusSpan = document.createElement("span");
+      statusSpan.classList.add("play-status");
+      statusSpan.style.cssText = "color: #f39c12 !important; font-size: 0.8rem !important;";
+      
+      option.appendChild(titleSpan);
+      option.appendChild(statusSpan);
+      
+      option.addEventListener("click", () => {
+        this.selectBestHitsSong(index);
+        this.bestHits_dropdown_menu.style.display = "none";
+        this.bestHits_dropdown_button.innerHTML = "▼";
+      });
+      
+      option.addEventListener("mouseenter", () => {
+        option.style.background = "#16703e !important";
+      });
+      
+      option.addEventListener("mouseleave", () => {
+        option.style.background = "#1e8449 !important";
+      });
+      
+      this.bestHits_dropdown_menu.appendChild(option);
+    });
+
+    // Assemble the container
+    this.bestHits_container.appendChild(this.bestHits_button);
+    this.bestHits_container.appendChild(this.bestHits_dropdown_button);
+    this.bestHits_container.appendChild(this.bestHits_dropdown_menu);
+    bestHitsSection.appendChild(this.bestHits_container);
+
+    // Create native HTML5 audio player - much simpler and more reliable!
+    this.audioPlayerContainer = document.createElement("div");
+    this.audioPlayerContainer.classList.add("native-audio-player");
+    this.audioPlayerContainer.style.display = "none";
+    this.audioPlayerContainer.style.padding = "1rem";
+    this.audioPlayerContainer.style.background = "#f8f9fa";
+    this.audioPlayerContainer.style.borderRadius = "8px";
+    this.audioPlayerContainer.style.margin = "0.5rem auto";
+    this.audioPlayerContainer.style.width = "calc(90% - 1rem)";
+    this.audioPlayerContainer.style.maxWidth = "280px";
+    this.audioPlayerContainer.style.transform = "translateX(0.5rem)";
+    this.audioPlayerContainer.style.boxShadow = "0px 2px 8px rgba(0, 0, 0, 0.1)";
+    
+    // Song title display
+    this.songTitleDisplay = document.createElement("div");
+    this.songTitleDisplay.style.cssText = `
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 0.5rem;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    `;
+    this.songTitleDisplay.textContent = "Select a song";
+    
+    // Configure the existing mp3Player to show native controls
+    this.mp3Player.controls = true;
+    this.mp3Player.style.cssText = `
+      width: 100%;
+      height: 40px;
+      outline: none;
+    `;
+    
+    this.audioPlayerContainer.appendChild(this.songTitleDisplay);
+    this.audioPlayerContainer.appendChild(this.mp3Player);
+    bestHitsSection.appendChild(this.audioPlayerContainer);
+
+    // Add to aside
+    this.aside.appendChild(bestHitsSection);
+
+    // Audio event listeners for native player
+    this.mp3Player.addEventListener("loadstart", () => {
+      this.updateNativePlayer("Loading...");
+    });
+
+    this.mp3Player.addEventListener("canplay", () => {
+      this.updateNativePlayer();
+    });
+
+    this.mp3Player.addEventListener("play", () => {
+      this.audioPlayerContainer.style.display = "block";
+      this.bestHits_button.classList.add("active");
+      this.updateDropdownPlayStatus();
+      
+      // Pause the Tone.js generator if it's playing
+      if (this.player.playing) {
+        this.pause();
+      }
+    });
+
+    this.mp3Player.addEventListener("pause", () => {
+      this.bestHits_button.classList.remove("active");
+      this.updateDropdownPlayStatus();
+    });
+
+    this.mp3Player.addEventListener("ended", () => {
+      this.stopBestHits();
+    });
+
+    this.mp3Player.addEventListener("error", (e) => {
+      console.error("Audio playback error:", e);
+      this.updateNativePlayer("Error loading audio");
+      this.stopBestHits();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!this.bestHits_container.contains(e.target)) {
+        this.bestHits_dropdown_menu.style.display = "none";
+        this.bestHits_dropdown_button.innerHTML = "▼";
+      }
+    });
+  }
+
+  updateNativePlayer(message = null) {
+    if (message) {
+      this.songTitleDisplay.textContent = message;
+      return;
+    }
+
+    if (this.currentSongIndex >= 0) {
+      const song = this.bestHitsSongs[this.currentSongIndex];
+      this.songTitleDisplay.textContent = `${song.title} - ${song.artist}`;
+    }
+  }
+
+  selectBestHitsSong(index) {
+    this.currentSongIndex = index;
+    const song = this.bestHitsSongs[index];
+    
+    // Stop current playback
+    if (!this.mp3Player.paused) {
+      this.mp3Player.pause();
+    }
+    
+    // Load new song
+    this.mp3Player.src = song.file;
+    this.updateNativePlayer(`Loading ${song.title}...`);
+    
+    // Start playback
+    this.mp3Player.play().catch(error => {
+      console.error("Playback failed:", error);
+      this.updateNativePlayer("Playback failed - check if file exists");
+    });
+  }
+
+  toggleBestHitsDropdown() {
+    const isVisible = this.bestHits_dropdown_menu.style.display === "block";
+    this.bestHits_dropdown_menu.style.display = isVisible ? "none" : "block";
+    this.bestHits_dropdown_button.innerHTML = isVisible ? "▼" : "▲";
+  }
+
+  toggleBestHitsPlayback() {
+    if (this.currentSongIndex === -1) {
+      // No song selected, play first one
+      this.selectBestHitsSong(0);
+    } else {
+      // Toggle current song
+      if (this.mp3Player.paused) {
+        this.mp3Player.play().catch(error => {
+          console.error("Playback failed:", error);
+          this.updateNativePlayer("Playback failed");
+        });
+      } else {
+        this.mp3Player.pause();
+      }
+    }
+  }
+
+  updateDropdownPlayStatus() {
+    const options = this.bestHits_dropdown_menu.querySelectorAll(".best-hits-dropdown-option");
+    options.forEach((option, index) => {
+      const statusEl = option.querySelector(".play-status");
+      if (index === this.currentSongIndex && !this.mp3Player.paused) {
+        option.classList.add("playing");
+        option.style.background = "#16a085 !important";
+        if (statusEl) statusEl.textContent = "♪";
+      } else {
+        option.classList.remove("playing");
+        option.style.background = "#1e8449 !important";
+        if (statusEl) statusEl.textContent = "";
+      }
+    });
+  }
+
+  formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  }
+
+  stopBestHits() {
+    this.mp3Player.pause();
+    this.mp3Player.currentTime = 0;
+    this.audioPlayerContainer.style.display = "none";
+    this.bestHits_button.classList.remove("active");
+    this.updateDropdownPlayStatus();
+    this.songTitleDisplay.textContent = "Select a song";
+  }
+
+    randomizeAll() {
+    // Show brief animation
+    this.randomizer_button.innerHTML = "🔄 Randomizing...";
+    this.randomizer_button.disabled = true;
+    
+    setTimeout(() => {
+      try {
+      // Randomize key
+      const keys = Object.keys(this.noteToMidi);
+      const randomKey = keys[Math.floor(Math.random() * keys.length)];
+      this.ms_key = randomKey;
+        document
+          .querySelectorAll(".keys div")
+          .forEach((el) => el.classList.remove("key-current"));
+        const keyElement = document.querySelector(
+          `.keys div[data-value="${randomKey}"]`,
+        );
+        if (keyElement) keyElement.classList.add("key-current");
+      
+      // Randomize mode
+      const modes = this.MS.dict.modes;
+      const randomMode = modes[Math.floor(Math.random() * modes.length)];
+      this.ms_mode = randomMode;
+        document
+          .querySelectorAll(".modes div")
+          .forEach((el) => el.classList.remove("mode-current"));
+        const modeElement = document.querySelector(
+          `.modes div[data-value="${randomMode}"]`,
+        );
+        if (modeElement) modeElement.classList.add("mode-current");
+      
+      // Randomize progression
+      const progressions = Object.keys(this.progressions);
+        const randomProgression =
+          progressions[Math.floor(Math.random() * progressions.length)];
+      this.current_progression = randomProgression;
+      this.chords = this.progressions[randomProgression];
+      this.chord_count = this.chords.length;
+        document
+          .querySelectorAll(".progressions div")
+          .forEach((el) => el.classList.remove("progression-current"));
+        const progressionElement = document.querySelector(
+          `.progressions div[data-value="${randomProgression}"]`,
+        );
+        if (progressionElement)
+          progressionElement.classList.add("progression-current");
+      
+      // Randomize chord style
+        const chordStyles = ["arpeggiated", "block_chords"];
+        const randomChordStyle =
+          chordStyles[Math.floor(Math.random() * chordStyles.length)];
+      this.chord_style = randomChordStyle;
+        document
+          .querySelectorAll(".chord-style div")
+          .forEach((el) => el.classList.remove("chord-style-current"));
+        const chordStyleElement = document.querySelector(
+          `.chord-style div[data-value="${randomChordStyle}"]`,
+        );
+        if (chordStyleElement)
+          chordStyleElement.classList.add("chord-style-current");
+      
+      // Randomize song preset
+      const presets = Object.keys(this.song_presets);
+        const randomPreset =
+          presets[Math.floor(Math.random() * presets.length)];
+      this.current_song_preset = randomPreset;
+      this.composition_structure = this.song_presets[randomPreset].structure;
+        document
+          .querySelectorAll(".song-composer div")
+          .forEach((el) => el.classList.remove("song-preset-current"));
+        const presetElement = document.querySelector(
+          `.song-composer div[data-value="${randomPreset}"]`,
+        );
+        if (presetElement) presetElement.classList.add("song-preset-current");
+      
+      // Randomize BPM
+      const bpms = [60, 80, 100, 120, 140, 160];
+      const randomBPM = bpms[Math.floor(Math.random() * bpms.length)];
+      this.player.bpm = randomBPM;
+        Tone.Transport.bpm.value = this.player.bpm; // Update actual BPM
+        document
+          .querySelectorAll(".bpm div")
+          .forEach((el) => el.classList.remove("bpm-current"));
+        const bpmElement = document.querySelector(
+          `.bpm div[data-value="${randomBPM}"]`,
+        );
+        if (bpmElement) bpmElement.classList.add("bpm-current");
+      
+      // Randomize arpeggio steps
+      const steps = [3, 4, 5, 6];
+      const randomSteps = steps[Math.floor(Math.random() * steps.length)];
+      this.ap_steps = randomSteps;
+        document
+          .querySelectorAll(".steps div")
+          .forEach((el) => el.classList.remove("step-current"));
+        const stepsElement = document.querySelector(
+          `.steps div[data-value="${randomSteps}"]`,
+        );
+        if (stepsElement) stepsElement.classList.add("step-current");
+      
+      // Randomize pattern type
+        const types = ["straight", "looped"];
+      const randomType = types[Math.floor(Math.random() * types.length)];
+      this.ap_pattern_type = randomType;
+        document
+          .querySelectorAll(".type div")
+          .forEach((el) => el.classList.remove("type-current"));
+        const typeElement = document.querySelector(
+          `.type div[data-value="${randomType}"]`,
+        );
+        if (typeElement) typeElement.classList.add("type-current");
+      
+      // Update everything
+      this.msUpdateScale();
+      this.AP.updatePatterns({ steps: this.ap_steps });
+      this.apUpdate();
+      this._updatePatternSelector();
+      this._updateChordSelector();
+      this._updateOutput();
+      
+      // Reset section progress
+      this.current_section = 0;
+      this.section_step = 0;
+      } catch (error) {
+        console.error("Error during randomization:", error);
+      } finally {
+        // Always reset button, even if there's an error
+        this.randomizer_button.innerHTML = "🎲 Randomize All";
+      this.randomizer_button.disabled = false;
+      }
+    }, 300); // Reduced timeout for snappier feel
   }
 }
 

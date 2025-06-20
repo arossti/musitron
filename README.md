@@ -12,6 +12,7 @@ A web-based minimalist music generator featuring advanced arpeggio patterns and 
 - Multiple MIDI export options
 - Advanced chord progressions and song structures
 - Real-time preview and randomization features
+- **🆕 Improved UI layout and native audio player**
 
 ## 🚀 Quick Start
 
@@ -29,6 +30,28 @@ A web-based minimalist music generator featuring advanced arpeggio patterns and 
 4. **Click the yellow "Play" button** and start creating music!
 
 ---
+
+## 🆕 Recent UI Improvements (Latest Update)
+
+### **Enhanced Layout Organization**
+- **Better Flow**: All action buttons now appear after core display components
+- **Logical Order**: Keyboard → Output Console → BPM → Core Selectors → Controls Section → Best Hits
+- **Professional Structure**: Grouped controls in dedicated "Controls" section for better usability
+
+### **Best Hits Audio Player**
+- **🎵 Song Selection Dropdown**: Improved visibility with white text on dark background - song names are now clearly visible
+- **🎼 Native HTML5 Audio Player**: Replaced problematic custom player with browser's native controls
+  - **No More Display Issues**: Eliminated white masking effects and button movement problems
+  - **Reliable Performance**: Browser handles all interactions, hover effects, and accessibility
+  - **Standard Controls**: Play/pause, seek, volume, speed, keyboard shortcuts - all built-in
+  - **Professional Appearance**: Clean, consistent look across all browsers
+- **📱 Smart Container**: Responsive design that scales properly in sidebar without overflow
+- **🎯 Better UX**: Song title displays above player, dropdown positioned correctly
+
+### **Dropdown Improvements**
+- **Enhanced Visibility**: Song names now appear immediately with bold white text
+- **Proper Positioning**: Dropdown appears under correct button with improved z-index handling
+- **Hover Effects**: Clean background color changes without text masking issues
 
 ## Features
 
@@ -309,11 +332,15 @@ The enhanced version adds:
 - ✅ **🎼 AI Signature Compositions** - Claude's unique algorithmic compositions based on mathematical beauty
 - ✅ **Export App State** - Export exactly what you're hearing in the UI as MIDI
 - ✅ **🔮 Randomized MIDI Export** - Spontaneous, creative variations with surprises and humanization
-- ✅ **Full Chords Feature** - Block chords vs arpeggiated patterns
+- ✅ **Full Chords Feature** - Block chords vs arpeggiated patterns (needs work)
 - ✅ **Song Composer** - Multiple preset compositional structures
-- ✅ **Randomizer** - One-click composition generation  
+- ✅ **Randomizer** - One-click composition generation
 - ✅ **Triple MIDI Export** - UI-accurate, randomized, and AI algorithmic exports
 - ✅ **Mathematical composition algorithms** - Golden ratio, Fibonacci, prime number harmonies
+- ✅ **🆕 Professional UI Layout** - Reorganized controls for better workflow
+- ✅ **🆕 Native Audio Player** - Browser-based player replacing custom controls
+- ✅ **🆕 Enhanced Dropdowns** - Improved text visibility and positioning
+- ✅ **🆕 Best Hits Section** - MP3 playback with song selection
 - ✅ **Non-linear compositional structure** (vs. simple looping)
 - ✅ **Multiple progression options** (vs. single fixed progression)
 - ✅ **Dynamic tempo and expression changes**
