@@ -1,12 +1,5 @@
-// Initialize audio context properly
-document.documentElement.addEventListener('mousedown', async () => {
-  if (Tone.context.state !== 'running') {
-    try {
-      await Tone.start();
-    } catch (error) {
-      // This is normal - audio will start when user clicks Play
-    }
-  }
+document.documentElement.addEventListener('mousedown', () => {
+  if (Tone.context.state !== 'running') Tone.context.resume();
 });
 /**
  * MusicalScale
@@ -479,7 +472,7 @@ class ArpPlayer {
         delay: new Tone.PingPongDelay('16n', 0.1),
       };
       this.synths = {
-        treb: new Tone.PolySynth(Tone.Synth),
+        treb: new Tone.PolySynth(1, Tone.SimpleAM),
         bass: new Tone.DuoSynth()
       };
       
@@ -493,8 +486,8 @@ class ArpPlayer {
     } catch (error) {
       // Fallback to simpler synths if advanced ones fail
       this.synths = {
-        treb: new Tone.Synth(),
-        bass: new Tone.Synth()
+        treb: new Tone.PolySynth(1, Tone.SimpleAM),
+        bass: new Tone.DuoSynth()
       };
       this.channel = {
         master: new Tone.Gain(0.7),
@@ -513,7 +506,7 @@ class ArpPlayer {
     this.fx.reverb.wet.value = 0.2;
     this.fx.delay.wet.value = 0.3;
     // gain levels
-    this.channel.master.toDestination();
+    this.channel.master.toMaster();
     this.channel.treb.connect(this.channel.master);
     this.channel.bass.connect(this.channel.master);
     // fx chains
@@ -530,44 +523,27 @@ class ArpPlayer {
       this._utilClassToggle(e.target, 'bpm-current');
     };
     
-    this.playerToggle = async () => {
-      try {
-        if(this.player.playing) {
-          Tone.Transport.pause();
-          this.channel.master.gain.value = 0;
-          this.play_toggle.classList.remove('active');
-        } else {
-          // Ensure AudioContext is started - this handles suspension from app switching
-          if (Tone.context.state !== 'running') {
-            await Tone.start();
-          }
-          
-          // Start or resume the transport regardless of previous state
-          Tone.Transport.start();
-          
-          this.channel.master.gain.value = 1;
-          this.play_toggle.classList.add('active');
-        }
-        this.player.playing = !this.player.playing;
-      } catch (error) {
-        console.error('Error toggling playback:', error);
-        this.play_toggle.innerHTML = 'Audio Error - Try Again';
-        setTimeout(() => {
-          this.play_toggle.innerHTML = `<span class="play">Play</span><span class="pause">Pause</span>`;
-        }, 2000);
+    this.playerToggle = () => {
+      if(this.player.playing) {
+        Tone.Transport.pause();
+        this.channel.master.gain.value = 0;
+        this.play_toggle.classList.remove('active');
+      } else {
+        Tone.Transport.start();
+        this.channel.master.gain.value = 1;
+        this.play_toggle.classList.add('active');
       }
+      this.player.playing = !this.player.playing;
     };
     
     this.play_toggle = document.createElement('button');
     this.play_toggle.innerHTML = `<span class="play">Play</span><span class="pause">Pause</span>`;
     this.aside.appendChild(this.play_toggle);
-    this.play_toggle.addEventListener('touchstart', async (e) => {
-      if (Tone.context.state !== 'running') {
-        await Tone.start();
-      }
-    }, { passive: true });
-    this.play_toggle.addEventListener('click', async (e) => {
-      await this.playerToggle();
+    this.play_toggle.addEventListener('touchstart', (e) => {
+      Tone.startMobile();
+    });
+    this.play_toggle.addEventListener('click', (e) => {
+      this.playerToggle();
     });
     
     Tone.Transport.bpm.value = this.player.bpm;
