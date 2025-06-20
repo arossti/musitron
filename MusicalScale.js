@@ -436,8 +436,8 @@ class ArpPlayer {
     this._setMusicalScale();
     this._setArpeggioPatterns();
     this._drawKeyboard();
+    this._loadChordSelector(); // Move chord selector right after keyboard
     this._drawOutput();
-    this._loadChordSelector();
     this._loadProgressionSelector();
     this._loadChordStyleSelector(); // New: Block chords vs arpeggiated
     this._loadSongComposer(); // New: Song structure presets
