@@ -452,10 +452,17 @@ class ArpPlayer {
     this._loadSynths();
     this._loadTransport();
     
-    // change tabs, pause player
+    // Handle audio context suspension when page becomes hidden/visible
     document.addEventListener('visibilitychange', () => {
-      this.player.playing = true;
-      this.playerToggle();
+      if (document.hidden) {
+        // Page is now hidden - don't auto-pause, just ensure we can resume later
+        return;
+      } else {
+        // Page is now visible - resume audio context if it was suspended
+        if (this.player.playing && Tone.context.state === 'suspended') {
+          Tone.start().catch(console.error);
+        }
+      }
     });
   };
   
@@ -530,11 +537,14 @@ class ArpPlayer {
           this.channel.master.gain.value = 0;
           this.play_toggle.classList.remove('active');
         } else {
-          // Ensure AudioContext is started
+          // Ensure AudioContext is started - this handles suspension from app switching
           if (Tone.context.state !== 'running') {
             await Tone.start();
           }
+          
+          // Start or resume the transport regardless of previous state
           Tone.Transport.start();
+          
           this.channel.master.gain.value = 1;
           this.play_toggle.classList.add('active');
         }
