@@ -16,5 +16,9 @@ GB Projects/
 superceded/
 Bea|T/
 
+# Allow MP3 files in the songs directory for Best Hits feature
+!songs/
+!songs/*.mp3
+
 # Keep only the core web app files:
-# index.html, MusicalScale.js, MusicalScale.css, Tone.js, README.md, favicon.ico 
+# index.html, MusicalScale.js, MusicalScale.css, Tone.js, README.md, favicon.ico, songs/ 

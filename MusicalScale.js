@@ -475,6 +475,7 @@ class ArpPlayer {
     this._loadSongComposer(); // New: Song structure presets
     this._loadRandomizer(); // New: Randomize all settings
     this._loadMIDIControls();
+    this._loadBestHitsPlayer();
     this._loadBPMSelector();
     this._loadKeySelector();
     this._loadModeSelector();
@@ -568,6 +569,11 @@ class ArpPlayer {
           this.channel.master.gain.value = 0;
           this.play_toggle.classList.remove("active");
         } else {
+          // Pause MP3 player if it's playing
+          if (this.mp3Player && !this.mp3Player.paused) {
+            this.mp3Player.pause();
+          }
+          
           // Ensure AudioContext is started
           if (Tone.context.state !== "running") {
             await Tone.start();
@@ -583,6 +589,16 @@ class ArpPlayer {
         setTimeout(() => {
           this.play_toggle.innerHTML = `<span class="play">Play</span><span class="pause">Pause</span>`;
         }, 2000);
+      }
+    };
+
+    // Add a general pause function for external use
+    this.pause = () => {
+      if (this.player.playing) {
+        Tone.Transport.pause();
+        this.channel.master.gain.value = 0;
+        this.play_toggle.classList.remove("active");
+        this.player.playing = false;
       }
     };
 
@@ -1383,6 +1399,256 @@ class ArpPlayer {
       "<h3>Exporting MIDI...</h3><p>This may take a few seconds</p>";
     this.progress_info.style.display = "none";
     this.aside.appendChild(this.progress_info);
+  }
+
+  _loadBestHitsPlayer() {
+    // Define available songs (these would need to be uploaded to a 'songs' directory)
+    this.bestHitsSongs = [
+      { file: "songs/Claude3.mp3", title: "Claude3", artist: "Musitron AI" },
+      { file: "songs/Claude4.mp3", title: "Claude4", artist: "Musitron AI" },
+      { file: "songs/Project1.mp3", title: "Project1", artist: "Studio Mix" },
+      { file: "songs/Project2.mp3", title: "Project2", artist: "Studio Mix" }
+    ];
+
+    // Create HTML5 audio element
+    this.mp3Player = document.createElement("audio");
+    this.mp3Player.preload = "none";
+    this.currentSongIndex = -1;
+
+    // Create Best Hits section container
+    const bestHitsSection = document.createElement("section");
+    bestHitsSection.classList.add("best-hits-section");
+
+    const title = document.createElement("h1");
+    title.textContent = "Best Hits";
+    bestHitsSection.appendChild(title);
+
+    // Create Best Hits button container with dropdown
+    this.bestHits_container = document.createElement("div");
+    this.bestHits_container.style.position = "relative";
+    this.bestHits_container.style.display = "flex";
+    this.bestHits_container.style.width = "calc(90% - 1rem)";
+    this.bestHits_container.style.maxWidth = "280px";
+    this.bestHits_container.style.margin = "1rem auto";
+    this.bestHits_container.style.transform = "translateX(0.5rem)";
+
+    // Main Best Hits button
+    this.bestHits_button = document.createElement("button");
+    this.bestHits_button.innerHTML = '<span class="play">🎵 Best Hits</span><span class="pause">⏸ Pause</span>';
+    this.bestHits_button.classList.add("midi-export", "best-hits");
+    this.bestHits_button.style.borderRadius = "4px 0 0 4px";
+    this.bestHits_button.style.margin = "0";
+    this.bestHits_button.style.width = "calc(100% - 30px)";
+    this.bestHits_button.addEventListener("click", () => {
+      this.toggleBestHitsPlayback();
+    });
+
+    // Dropdown button
+    this.bestHits_dropdown_button = document.createElement("button");
+    this.bestHits_dropdown_button.innerHTML = "▼";
+    this.bestHits_dropdown_button.classList.add("midi-export", "best-hits-dropdown");
+    this.bestHits_dropdown_button.style.background = "#229954";
+    this.bestHits_dropdown_button.style.borderColor = "#229954";
+    this.bestHits_dropdown_button.style.width = "30px";
+    this.bestHits_dropdown_button.style.flexShrink = "0";
+    this.bestHits_dropdown_button.style.margin = "0";
+    this.bestHits_dropdown_button.style.borderRadius = "0 4px 4px 0";
+    this.bestHits_dropdown_button.style.borderLeft = "1px solid #1e8449";
+    this.bestHits_dropdown_button.style.transform = "none";
+    this.bestHits_dropdown_button.style.fontSize = "0.8rem";
+    this.bestHits_dropdown_button.style.padding = "0";
+    this.bestHits_dropdown_button.addEventListener("click", () => {
+      this.toggleBestHitsDropdown();
+    });
+
+    // Create dropdown menu
+    this.bestHits_dropdown_menu = document.createElement("div");
+    this.bestHits_dropdown_menu.classList.add("best-hits-dropdown-menu");
+    this.bestHits_dropdown_menu.style.position = "absolute";
+    this.bestHits_dropdown_menu.style.top = "100%";
+    this.bestHits_dropdown_menu.style.left = "0";
+    this.bestHits_dropdown_menu.style.width = "100%";
+    this.bestHits_dropdown_menu.style.display = "none";
+    this.bestHits_dropdown_menu.style.zIndex = "9999";
+    this.bestHits_dropdown_menu.style.marginTop = "2px";
+
+    // Add song options to dropdown
+    this.bestHitsSongs.forEach((song, index) => {
+      const option = document.createElement("div");
+      option.classList.add("best-hits-dropdown-option");
+      option.innerHTML = `
+        <span>${song.title}</span>
+        <span class="play-status"></span>
+      `;
+      option.addEventListener("click", () => {
+        this.selectBestHitsSong(index);
+        this.bestHits_dropdown_menu.style.display = "none";
+        this.bestHits_dropdown_button.innerHTML = "▼";
+      });
+      this.bestHits_dropdown_menu.appendChild(option);
+    });
+
+    // Assemble the container
+    this.bestHits_container.appendChild(this.bestHits_button);
+    this.bestHits_container.appendChild(this.bestHits_dropdown_button);
+    this.bestHits_container.appendChild(this.bestHits_dropdown_menu);
+
+    // Create audio player info display
+    this.audioPlayerInfo = document.createElement("div");
+    this.audioPlayerInfo.classList.add("audio-player-info");
+    this.audioPlayerInfo.innerHTML = `
+      <div class="song-title"></div>
+      <div class="controls">
+        <span class="time-display">0:00 / 0:00</span>
+        <button onclick="app.stopBestHits()" style="background: none; border: none; color: white; cursor: pointer; font-size: 0.8rem;">Stop</button>
+      </div>
+    `;
+
+    bestHitsSection.appendChild(this.bestHits_container);
+    bestHitsSection.appendChild(this.audioPlayerInfo);
+
+    // Add to aside
+    this.aside.appendChild(bestHitsSection);
+
+    // Audio event listeners
+    this.mp3Player.addEventListener("loadstart", () => {
+      this.updateAudioPlayerInfo("Loading...");
+    });
+
+    this.mp3Player.addEventListener("canplay", () => {
+      this.updateAudioPlayerInfo();
+    });
+
+    this.mp3Player.addEventListener("play", () => {
+      this.audioPlayerInfo.classList.add("playing");
+      this.bestHits_button.classList.add("active");
+      this.updateDropdownPlayStatus();
+      
+      // Pause the Tone.js generator if it's playing
+      if (this.player.playing) {
+        this.pause();
+      }
+    });
+
+    this.mp3Player.addEventListener("pause", () => {
+      this.audioPlayerInfo.classList.remove("playing");
+      this.bestHits_button.classList.remove("active");
+      this.updateDropdownPlayStatus();
+    });
+
+    this.mp3Player.addEventListener("ended", () => {
+      this.stopBestHits();
+    });
+
+    this.mp3Player.addEventListener("timeupdate", () => {
+      this.updateAudioPlayerInfo();
+    });
+
+    this.mp3Player.addEventListener("error", (e) => {
+      console.error("Audio playback error:", e);
+      this.updateAudioPlayerInfo("Error loading audio");
+      this.stopBestHits();
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener("click", (e) => {
+      if (!this.bestHits_container.contains(e.target)) {
+        this.bestHits_dropdown_menu.style.display = "none";
+        this.bestHits_dropdown_button.innerHTML = "▼";
+      }
+    });
+  }
+
+  toggleBestHitsDropdown() {
+    const isVisible = this.bestHits_dropdown_menu.style.display === "block";
+    this.bestHits_dropdown_menu.style.display = isVisible ? "none" : "block";
+    this.bestHits_dropdown_button.innerHTML = isVisible ? "▼" : "▲";
+  }
+
+  selectBestHitsSong(index) {
+    this.currentSongIndex = index;
+    const song = this.bestHitsSongs[index];
+    
+    // Stop current playback
+    if (!this.mp3Player.paused) {
+      this.mp3Player.pause();
+    }
+    
+    // Load new song
+    this.mp3Player.src = song.file;
+    this.updateAudioPlayerInfo(`Loading ${song.title}...`);
+    
+    // Start playback
+    this.mp3Player.play().catch(error => {
+      console.error("Playback failed:", error);
+      this.updateAudioPlayerInfo("Playback failed - check if file exists");
+    });
+  }
+
+  toggleBestHitsPlayback() {
+    if (this.currentSongIndex === -1) {
+      // No song selected, play first one
+      this.selectBestHitsSong(0);
+    } else {
+      // Toggle current song
+      if (this.mp3Player.paused) {
+        this.mp3Player.play().catch(error => {
+          console.error("Playback failed:", error);
+          this.updateAudioPlayerInfo("Playback failed");
+        });
+      } else {
+        this.mp3Player.pause();
+      }
+    }
+  }
+
+  stopBestHits() {
+    this.mp3Player.pause();
+    this.mp3Player.currentTime = 0;
+    this.audioPlayerInfo.classList.remove("playing");
+    this.bestHits_button.classList.remove("active");
+    this.updateDropdownPlayStatus();
+  }
+
+  updateAudioPlayerInfo(message = null) {
+    const titleEl = this.audioPlayerInfo.querySelector(".song-title");
+    const timeEl = this.audioPlayerInfo.querySelector(".time-display");
+    
+    if (message) {
+      titleEl.textContent = message;
+      timeEl.textContent = "";
+      return;
+    }
+
+    if (this.currentSongIndex >= 0) {
+      const song = this.bestHitsSongs[this.currentSongIndex];
+      titleEl.textContent = `${song.title} - ${song.artist}`;
+      
+      const current = this.formatTime(this.mp3Player.currentTime);
+      const duration = this.formatTime(this.mp3Player.duration);
+      timeEl.textContent = `${current} / ${duration}`;
+    }
+  }
+
+  updateDropdownPlayStatus() {
+    const options = this.bestHits_dropdown_menu.querySelectorAll(".best-hits-dropdown-option");
+    options.forEach((option, index) => {
+      const statusEl = option.querySelector(".play-status");
+      if (index === this.currentSongIndex && !this.mp3Player.paused) {
+        option.classList.add("playing");
+        statusEl.textContent = "♪";
+      } else {
+        option.classList.remove("playing");
+        statusEl.textContent = "";
+      }
+    });
+  }
+
+  formatTime(seconds) {
+    if (isNaN(seconds)) return "0:00";
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   }
 
   exportAppState() {
@@ -3046,4 +3312,5 @@ class ArpPlayer {
   }
 }
 
-const app = new ArpPlayer();
+// Make app globally accessible for Best Hits controls
+window.app = new ArpPlayer();

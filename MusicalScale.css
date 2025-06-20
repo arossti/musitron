@@ -550,3 +550,156 @@ svg {
 .claude-dropdown-option:last-child {
   border-bottom: none;
 }
+
+/* Best Hits dropdown styling */
+button.best-hits {
+  background: #27ae60;
+  border-color: #229954;
+  animation: bestHitsGlow 2.6s ease-in-out infinite;
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+button.best-hits:hover:not(:disabled) {
+  background: #1e8449;
+  box-shadow:
+    0px 0px 16px rgba(39, 174, 96, 0.6),
+    0px 4px 8px rgba(0, 0, 0, 0.2);
+  transform: translateX(0.5rem) translateY(-1px);
+}
+
+button.best-hits:disabled {
+  background: #95a5a6;
+  border-color: #7f8c8d;
+  cursor: not-allowed;
+  animation: none;
+  box-shadow:
+    0px 0px 4px rgba(149, 165, 166, 0.2),
+    0px 2px 4px rgba(0, 0, 0, 0.1);
+  transform: translateX(0.5rem);
+}
+
+button.best-hits-dropdown {
+  background: #229954;
+  border-color: #229954;
+  animation: bestHitsGlow 2.6s ease-in-out infinite;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.best-hits-dropdown:hover:not(:disabled) {
+  background: #1e8449;
+  box-shadow:
+    0px 0px 16px rgba(34, 153, 84, 0.6),
+    0px 4px 8px rgba(0, 0, 0, 0.2);
+  transform: none;
+}
+
+button.best-hits-dropdown:disabled {
+  background: #95a5a6;
+  border-color: #7f8c8d;
+  cursor: not-allowed;
+  animation: none;
+  box-shadow:
+    0px 0px 4px rgba(149, 165, 166, 0.2),
+    0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.best-hits-dropdown-menu {
+  position: absolute !important;
+  z-index: 9999 !important;
+  background: #229954;
+  border: 2px solid #1e8449;
+  border-radius: 4px;
+  box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.best-hits-dropdown-option {
+  padding: 0.5rem 1rem;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.2s ease;
+  border-bottom: 1px solid #1e8449;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.best-hits-dropdown-option:hover {
+  background: #1e8449 !important;
+}
+
+.best-hits-dropdown-option:last-child {
+  border-bottom: none;
+}
+
+.best-hits-dropdown-option.playing {
+  background: #16a085 !important;
+  font-weight: bold;
+}
+
+.best-hits-dropdown-option .play-status {
+  font-size: 0.8rem;
+  opacity: 0.8;
+  margin-left: 0.5rem;
+}
+
+@keyframes bestHitsGlow {
+  0% {
+    box-shadow:
+      0px 0px 6px rgba(39, 174, 96, 0.3),
+      0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    box-shadow:
+      0px 0px 18px rgba(39, 174, 96, 0.7),
+      0px 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  100% {
+    box-shadow:
+      0px 0px 6px rgba(39, 174, 96, 0.3),
+      0px 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.audio-player-info {
+  background: rgba(39, 174, 96, 0.9);
+  color: white;
+  padding: 0.5rem 1rem;
+  margin: 0.5rem auto;
+  border-radius: 4px;
+  text-align: center;
+  width: calc(90% - 1rem);
+  max-width: 280px;
+  transform: translateX(0.5rem);
+  z-index: 50;
+  position: relative;
+  font-size: 0.8rem;
+  display: none;
+}
+
+.audio-player-info.playing {
+  display: block;
+}
+
+.audio-player-info .song-title {
+  font-weight: bold;
+  margin-bottom: 0.25rem;
+}
+
+.audio-player-info .controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.5rem;
+}
+
+.audio-player-info .time-display {
+  font-size: 0.7rem;
+  opacity: 0.8;
+}
