@@ -1,0 +1,20 @@
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# GarageBand project files (large binary files)
+*.band/
+GB Projects/
+
+# Zip archives and old versions
+*.zip
+superceded/
+Bea|T/
+
+# Keep only the core web app files:
+# index.html, MusicalScale.js, MusicalScale.css, Tone.js, README.md, favicon.ico 
