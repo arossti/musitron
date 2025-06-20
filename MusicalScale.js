@@ -470,7 +470,7 @@ class ArpPlayer {
       this.channel = {
         master: new Tone.Gain(0.7),
         treb: new Tone.Gain(0.7),
-        bass: new Tone.Gain(0.5), // Softer bass volume
+        bass: new Tone.Gain(0.8),
       };
       this.fx = {
         distortion: new Tone.Distortion(0.8),
@@ -482,15 +482,12 @@ class ArpPlayer {
         bass: new Tone.DuoSynth()
       };
       
-      // Configure bass synth for smoother sound
-      this.synths.bass.vibratoAmount.value = 0.05;
-      this.synths.bass.harmonicity.value = 1.2;
-      this.synths.bass.voice0.oscillator.type = 'sine';
-      this.synths.bass.voice0.envelope.attack = 0.1;
-      this.synths.bass.voice0.envelope.sustain = 0.4;
-      this.synths.bass.voice1.oscillator.type = 'sine';
-      this.synths.bass.voice1.envelope.attack = 0.1;
-      this.synths.bass.voice1.envelope.sustain = 0.4;
+      this.synths.bass.vibratoAmount.value = 0.1;
+      this.synths.bass.harmonicity.value = 1.5;
+      this.synths.bass.voice0.oscillator.type = 'triangle';
+      this.synths.bass.voice0.envelope.attack = 0.05;
+      this.synths.bass.voice1.oscillator.type = 'triangle';
+      this.synths.bass.voice1.envelope.attack = 0.05;
     } catch (error) {
       // Fallback to simpler synths if advanced ones fail
       this.synths = {
@@ -500,7 +497,7 @@ class ArpPlayer {
       this.channel = {
         master: new Tone.Gain(0.7),
         treb: new Tone.Gain(0.7),
-        bass: new Tone.Gain(0.5), // Softer bass volume
+        bass: new Tone.Gain(0.8),
       };
       this.fx = {
         distortion: new Tone.Distortion(0.8),
@@ -510,7 +507,7 @@ class ArpPlayer {
     }
     
     // fx mixes
-    this.fx.distortion.wet.value = 0.05; // Much less distortion for smoother bass
+    this.fx.distortion.wet.value = 0.2;
     this.fx.reverb.wet.value = 0.2;
     this.fx.delay.wet.value = 0.3;
     // gain levels
@@ -600,10 +597,9 @@ class ArpPlayer {
       let bass_o = chord.rel_octave + 2;
       let bass_1 = chord.note + bass_o;
       
-      // More sophisticated bass patterns
+      // slappin da bass
       if(!this.player.bass_on && this.shouldPlayBass(section)) {
         this.player.bass_on = true;
-        let bass_velocity = section.layers > 1 ? 0.8 : 0.6;
         this.synths.bass.triggerAttack(bass_1, time);
         this._utilActiveNoteClassToggle([bass_1.replace('#', 'is')], 'active-b');
       }
@@ -617,7 +613,7 @@ class ArpPlayer {
         this.section_step = 0;
       }
       
-      // Chord changes with more sophisticated timing
+      // changing chords
       let chord_change_interval = this.getChordChangeInterval(section);
       if(this.player.step % chord_change_interval === 0) {
         this.player.chord_step++;
