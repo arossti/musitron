@@ -6,7 +6,8 @@ This directory contains MP3 files for the "Best Hits" feature in Musitron.
 
 1. Upload your MP3 files to this `songs/` directory with these exact filenames:
    - `Claude3.mp3` - Claude3 composition
-   - `Claude4.mp3` - Claude4 composition  
+   - `Claude4.mp3` - Claude4 composition
+   - `Claude5.mp3` - Claude5 composition
    - `Project1.mp3` - Project1 studio mix
    - `Project2.mp3` - Project2 studio mix
 
@@ -35,7 +36,8 @@ This directory contains MP3 files for the "Best Hits" feature in Musitron.
 ```
 songs/
 ├── Claude3.mp3      # Required
-├── Claude4.mp3      # Required  
+├── Claude4.mp3      # Required
+├── Claude5.mp3      # Required
 ├── Project1.mp3     # Required
 ├── Project2.mp3     # Required
 └── README.md        # This file

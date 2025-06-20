@@ -3089,6 +3089,7 @@ class ArpPlayer {
     this.bestHitsSongs = [
       { file: "songs/Claude3.mp3", title: "Claude3", artist: "Musitron AI" },
       { file: "songs/Claude4.mp3", title: "Claude4", artist: "Musitron AI" },
+      { file: "songs/Claude5.mp3", title: "Claude5", artist: "Musitron AI" },
       { file: "songs/Project1.mp3", title: "Project1", artist: "Studio Mix" },
       { file: "songs/Project2.mp3", title: "Project2", artist: "Studio Mix" }
     ];
