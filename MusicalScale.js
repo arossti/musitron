@@ -472,18 +472,20 @@ class ArpPlayer {
     this._drawOutput();
     this._loadBPMSelector();
     
-    // Core selectors - load these first
+    // Core selectors - load these in optimal order for layout
     this._loadKeySelector();
     this._loadModeSelector();
-    this._loadStepsSelector();
-    this._loadTypeSelector();
-    this._loadPatternSelector();
     this._loadProgressionSelector();
     this._loadChordStyleSelector(); // New: Block chords vs arpeggiated
     this._loadSongComposer(); // New: Song structure presets
+    this._loadStepsSelector();
+    this._loadTypeSelector();
     
-    // Create buttons section AFTER all core components
+    // Create buttons section BEFORE the large pattern selector
     this._createButtonsSection();
+    
+    // Load the large arpeggio pattern selector LAST to prevent layout issues
+    this._loadPatternSelector();
     
     // Load synths and transport last
     this._loadSynths();
