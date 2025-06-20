@@ -470,7 +470,7 @@ class ArpPlayer {
       this.channel = {
         master: new Tone.Gain(0.7),
         treb: new Tone.Gain(0.7),
-        bass: new Tone.Gain(0.8),
+        bass: new Tone.Gain(0.5), // Softer bass volume
       };
       this.fx = {
         distortion: new Tone.Distortion(0.8),
@@ -482,13 +482,15 @@ class ArpPlayer {
         bass: new Tone.DuoSynth()
       };
       
-      // Configure bass synth
-      this.synths.bass.vibratoAmount.value = 0.1;
-      this.synths.bass.harmonicity.value = 1.5;
-      this.synths.bass.voice0.oscillator.type = 'triangle';
-      this.synths.bass.voice0.envelope.attack = 0.05;
-      this.synths.bass.voice1.oscillator.type = 'triangle';
-      this.synths.bass.voice1.envelope.attack = 0.05;
+      // Configure bass synth for smoother sound
+      this.synths.bass.vibratoAmount.value = 0.05;
+      this.synths.bass.harmonicity.value = 1.2;
+      this.synths.bass.voice0.oscillator.type = 'sine';
+      this.synths.bass.voice0.envelope.attack = 0.1;
+      this.synths.bass.voice0.envelope.sustain = 0.4;
+      this.synths.bass.voice1.oscillator.type = 'sine';
+      this.synths.bass.voice1.envelope.attack = 0.1;
+      this.synths.bass.voice1.envelope.sustain = 0.4;
     } catch (error) {
       // Fallback to simpler synths if advanced ones fail
       this.synths = {
@@ -498,7 +500,7 @@ class ArpPlayer {
       this.channel = {
         master: new Tone.Gain(0.7),
         treb: new Tone.Gain(0.7),
-        bass: new Tone.Gain(0.8),
+        bass: new Tone.Gain(0.5), // Softer bass volume
       };
       this.fx = {
         distortion: new Tone.Distortion(0.8),
@@ -508,7 +510,7 @@ class ArpPlayer {
     }
     
     // fx mixes
-    this.fx.distortion.wet.value = 0.2;
+    this.fx.distortion.wet.value = 0.05; // Much less distortion for smoother bass
     this.fx.reverb.wet.value = 0.2;
     this.fx.delay.wet.value = 0.3;
     // gain levels
@@ -1432,8 +1434,8 @@ class ArpPlayer {
     this.AP.updatePatterns({ steps: this.ap_steps });
     this.apUpdate();
     this._updatePatternSelector();
-    this._updateChordSelector();
     this._updateOutput();
+    // Don't rebuild chord selector - just update the display
     
     // Reset section progress for fresh start
     this.current_section = 0;
