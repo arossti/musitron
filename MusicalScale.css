@@ -9,8 +9,8 @@ body {
 
 button {
   padding: 0.5rem 0;
-  width: calc(80% - 1rem);
-  max-width: 200px;
+  width: calc(90% - 1rem);
+  max-width: 280px;
   transform: translateX(0.5rem);
   border: none;
   text-align: center;
@@ -402,8 +402,8 @@ svg {
   margin: 0.5rem auto;
   border-radius: 4px;
   text-align: center;
-  width: calc(80% - 1rem);
-  max-width: 200px;
+  width: calc(90% - 1rem);
+  max-width: 280px;
   transform: translateX(0.5rem);
   z-index: 50;
   position: relative;

@@ -1,11 +1,25 @@
-# Philip Glass Style Music Generator
+# Musitron
 
-A local web application that generates minimalist, Philip Glass-inspired music using advanced arpeggio patterns and compositional structures. Now with **dual MIDI export** (UI-accurate + spontaneous randomized), **full chords**, **song composer**, and **randomizer** functionality!
+A web-based minimalist music generator featuring advanced arpeggio patterns and compositional structures. Built with **dual MIDI export** (UI-accurate + spontaneous randomized), **full chords**, **song composer**, **algorithmic AI compositions**, and **randomizer** functionality!
+
+## 🎼 Credits & Attribution
+
+**Original Foundation**: Based on the excellent work by [jak_e](https://codepen.io/jak_e/pen/qNrZyw) - Musical Scale and Arpeggio Pattern Generator
+
+**Enhanced by**: Andrew Thomson with Claude Sonnet 4
+- Added algorithmic AI compositions with mathematical beauty
+- Enhanced UI with subtle animations  
+- Multiple MIDI export options
+- Advanced chord progressions and song structures
+- Real-time preview and randomization features
 
 ## 🚀 Quick Start
 
-**To launch the app:**
+**To use Musitron:**
 
+**🌐 Live Version**: Visit **https://arossti.github.io/musitron** 
+
+**🖥️ Local Development:**
 1. **Open Terminal** and navigate to this directory
 2. **Run the server:**
    ```bash
@@ -253,4 +267,4 @@ The enhanced version adds:
 - ✅ **Philip Glass-inspired pattern variations**
 - ✅ **Automatic sectional development**
 
-This creates an incredibly varied and professional music generation system that captures the essence of Philip Glass's minimalist style while providing endless creative possibilities for musicians and producers! 
+This creates an incredibly varied and professional music generation system that captures the essence of minimalist composition while providing endless creative possibilities for musicians and producers! 

@@ -11,7 +11,8 @@ document.documentElement.addEventListener('mousedown', async () => {
 /**
  * MusicalScale
  * generate a scale of music
- * https://codepen.io/jakealbaugh/pen/NrdEYL/
+ * Original: https://codepen.io/jak_e/pen/qNrZyw
+ * Enhanced for Musitron with algorithmic compositions
  *
  * @param key {String} 
      the root of the key. flats will be converted to sharps.
@@ -1126,8 +1127,8 @@ class ArpPlayer {
     // Create Claude's Song split button container
     this.claude_song_container = document.createElement('div');
     this.claude_song_container.style.position = 'relative';
-    this.claude_song_container.style.width = 'calc(80% - 1rem)';
-    this.claude_song_container.style.maxWidth = '200px';
+    this.claude_song_container.style.width = 'calc(90% - 1rem)';
+    this.claude_song_container.style.maxWidth = '280px';
     this.claude_song_container.style.margin = '0.5rem auto';
     this.claude_song_container.style.transform = 'translateX(0.5rem)';
     this.claude_song_container.style.display = 'flex';
@@ -1136,7 +1137,7 @@ class ArpPlayer {
     
     // Main button - Preview
     this.claude_preview_button = document.createElement('button');
-    this.claude_preview_button.innerHTML = '🎼 Preview My Song';
+    this.claude_preview_button.innerHTML = '🎼 Voice of AI';
     this.claude_preview_button.classList.add('midi-export', 'claude-preview');
     this.claude_preview_button.style.background = '#2c3e50';
     this.claude_preview_button.style.borderColor = '#34495e';
@@ -1277,7 +1278,7 @@ class ArpPlayer {
       
       // Reset button appearance after a few seconds
       setTimeout(() => {
-        this.claude_preview_button.innerHTML = '🎼 Preview My Song';
+        this.claude_preview_button.innerHTML = '🎼 Voice of AI';
         this.claude_preview_button.style.background = '#2c3e50';
         this.claude_preview_button.style.borderColor = '#34495e';
       }, 4000);
@@ -1305,7 +1306,7 @@ class ArpPlayer {
       
       // Reset button appearance after a few seconds
       setTimeout(() => {
-        this.claude_preview_button.innerHTML = '🎼 Preview My Song';
+        this.claude_preview_button.innerHTML = '🎼 Voice of AI';
         this.claude_preview_button.style.background = '#2c3e50';
         this.claude_preview_button.style.borderColor = '#34495e';
       }, 4000);
