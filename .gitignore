@@ -1,0 +1,48 @@
+# ==========================================
+# MUSITRON WEB APP - SAFE REPOSITORY
+# Only web app files in this repository
+# ==========================================
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Archive directories and old versions
+Musitron 2.0/
+Musitron Machines/
+superceded/
+
+# Development files
+*.zip
+*.backup
+
+# Only allow specific small MP3 files
+!BestHits/
+!BestHits/*.mp3
+
+# Large audio files should never be here
+*.aif
+*.wav
+*.m4a
+*.flac
+*.aiff
+*.ogg
+
+# Image files  
+*.png
+*.jpg
+*.jpeg
+*.afphoto
+
+# ==========================================
+# ONLY THESE FILES SHOULD EVER BE COMMITTED:
+# - index.html, MusicalScale.js, MusicalScale.css
+# - Tone.js, README.md, Original.js
+# - Documentation: *.md files
+# - BestHits/*.mp3 (small demo files only)
+# ========================================== 
