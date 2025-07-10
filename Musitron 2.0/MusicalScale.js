@@ -503,33 +503,107 @@ class ArpPlayer {
       };
       this.synths = {
         treb: new Tone.PolySynth(Tone.Synth),
-        bass: new Tone.PolySynth(Tone.Synth, {
-          oscillator: {
-            type: "sine"
-          },
+        // COMMENTED OUT - Previous bass configuration (PolySynth + sine + chorus)
+        // bass: new Tone.PolySynth(Tone.Synth, {
+        //   oscillator: {
+        //     type: "sine"
+        //   },
+        //   envelope: {
+        //     attack: 0.4,
+        //     decay: 0.2,
+        //     sustain: 0.9,
+        //     release: 1.2
+        //   }
+        // }),
+        
+        // NEW: MonoSynth bass configuration
+        bass: new Tone.MonoSynth({
+          detune: 0,
+          portamento: 0,
+          volume: -8,
           envelope: {
-            attack: 0.4,
-            decay: 0.2,
-            sustain: 0.9,
-            release: 1.2
+            attack: 0.05,
+            attackCurve: "linear",
+            decay: 0.3,
+            decayCurve: "exponential",
+            release: 0.8,
+            releaseCurve: "exponential",
+            sustain: 0.4
+          },
+          filter: {
+            Q: 1,
+            detune: 0,
+            frequency: 0,
+            gain: 0,
+            rolloff: -12,
+            type: "lowpass"
+          },
+          filterEnvelope: {
+            attack: 0.001,
+            attackCurve: "linear",
+            baseFrequency: 300,
+            decay: 0.7,
+            decayCurve: "exponential",
+            exponent: 2,
+            octaves: 4,
+            release: 0.8,
+            releaseCurve: "exponential",
+            sustain: 0.1
+          },
+          oscillator: {
+            detune: 0,
+            frequency: 440,
+            partialCount: 8,
+            phase: 0,
+            type: "sawtooth"
           }
         }),
       };
       
-      // Additional bass warmth settings
-      this.synths.bass.volume.value = -6; // Slightly quieter for warmth
+      // MonoSynth volume is set in the configuration above
     } catch (error) {
       this.synths = {
         treb: new Tone.PolySynth(Tone.Synth),
-        bass: new Tone.PolySynth(Tone.Synth, {
-          oscillator: {
-            type: "sine"
-          },
+        // Fallback MonoSynth bass configuration (same as above)
+        bass: new Tone.MonoSynth({
+          detune: 0,
+          portamento: 0,
+          volume: -8,
           envelope: {
-            attack: 0.4,
-            decay: 0.2,
-            sustain: 0.9,
-            release: 1.2
+            attack: 0.05,
+            attackCurve: "linear",
+            decay: 0.3,
+            decayCurve: "exponential",
+            release: 0.8,
+            releaseCurve: "exponential",
+            sustain: 0.4
+          },
+          filter: {
+            Q: 1,
+            detune: 0,
+            frequency: 0,
+            gain: 0,
+            rolloff: -12,
+            type: "lowpass"
+          },
+          filterEnvelope: {
+            attack: 0.001,
+            attackCurve: "linear",
+            baseFrequency: 300,
+            decay: 0.7,
+            decayCurve: "exponential",
+            exponent: 2,
+            octaves: 4,
+            release: 0.8,
+            releaseCurve: "exponential",
+            sustain: 0.1
+          },
+          oscillator: {
+            detune: 0,
+            frequency: 440,
+            partialCount: 8,
+            phase: 0,
+            type: "sawtooth"
           }
         }),
       };
@@ -630,9 +704,8 @@ class ArpPlayer {
         
         if (!this.player.bass_on && this.shouldPlayBass(section)) {
             this.player.bass_on = true;
-            // Use triggerAttackRelease for smoother bass organ sound
-            const bassDuration = this.getChordChangeInterval(section) * (60 / this.player.bpm) * 0.25; // Quarter note duration
-            this.synths.bass.triggerAttackRelease(bass_1, bassDuration, time);
+            // MonoSynth uses triggerAttack for sustained bass notes
+            this.synths.bass.triggerAttack(bass_1, time);
             this._utilActiveNoteClassToggle([bass_1.replace("#", "is")], "active-b");
         }
         
@@ -674,7 +747,8 @@ class ArpPlayer {
         if (this.player.step % chord_change_interval === 0) {
             this.player.chord_step++;
             this.player.bass_on = false;
-            // PolySynth with triggerAttackRelease handles note release automatically
+            // MonoSynth requires explicit note release
+            this.synths.bass.triggerRelease(time);
             this.player.triad_step++;
         }
         
@@ -1115,6 +1189,16 @@ class ArpPlayer {
     buttonsSection.appendChild(this.progress_info);
   }
   
+  // Hide Hunt for a Ghost display when user changes settings
+  _hideHuntForGhostDisplay() {
+    if (this.huntForGhostDisplayed) {
+      this.progress_info.style.display = "none";
+      this.progress_info.innerHTML = "<h3>Exporting MIDI...</h3><p>This may take a few seconds</p>";
+      this.progress_info.classList.remove("hunt-for-ghost-info");
+      this.huntForGhostDisplayed = false;
+    }
+  }
+  
   _setMusicalScale() {
     this.MS = new MusicalScale({ key: this.ms_key, mode: this.ms_mode });
     this.msUpdateKey = (e) => {
@@ -1279,6 +1363,9 @@ class ArpPlayer {
   }
   
   randomizeAll() {
+    // Hide Hunt for a Ghost display when using controls
+    this._hideHuntForGhostDisplay();
+    
     // Show brief animation
     this.randomizer_button.innerHTML = "Randomizing...";
     this.randomizer_button.classList.add("disabled");
@@ -1424,6 +1511,9 @@ class ArpPlayer {
 
 
   exportAppState() {
+    // Hide Hunt for a Ghost display when using controls
+    this._hideHuntForGhostDisplay();
+    
     this.progress_info.style.display = "block";
     this.export_state_button.classList.add("disabled");
 
@@ -1682,15 +1772,15 @@ class ArpPlayer {
         "<p>Key: <strong>" + claudeKey + "</strong> | Mode: <strong>" + claudeMode + "</strong> | Style: <strong>" + claudeChordStyle + "</strong></p>" +
         "<p><strong>Arpeggio Progression:</strong> " + arpeggioProgressionText + "</p>";
       this.progress_info.style.display = "block";
-      this.progress_info.style.background = "rgba(44, 62, 80, 0.95)";
-      this.progress_info.style.borderLeft = "4px solid #27ae60";
-      setTimeout(() => {
-        this.progress_info.style.display = "none";
-        this.progress_info.innerHTML =
-          "<h3>Exporting MIDI...</h3><p>This may take a few seconds</p>";
-        this.progress_info.style.background = "rgba(52, 73, 94, 0.9)";
-        this.progress_info.style.borderLeft = "none";
-      }, 4500); // Extended time to read arpeggio progression
+      
+      // Use app's standard styling - no custom colors or borders
+      this.progress_info.style.background = "";
+      this.progress_info.style.borderLeft = "";
+      this.progress_info.style.border = "";
+      this.progress_info.classList.add("hunt-for-ghost-info");
+      
+      // Don't auto-hide - let it persist until user clicks another setting
+      this.huntForGhostDisplayed = true;
     }, 100);
   }
 
@@ -1727,6 +1817,9 @@ class ArpPlayer {
   }
   
   generateMIDI() {
+    // Hide Hunt for a Ghost display when using controls
+    this._hideHuntForGhostDisplay();
+    
     this.progress_info.style.display = "block";
     this.midi_button.classList.add("disabled");
     
@@ -3401,6 +3494,9 @@ class ArpPlayer {
   }
 
   toggleBestHitsPlayback() {
+    // Hide Hunt for a Ghost display when using controls
+    this._hideHuntForGhostDisplay();
+    
     if (this.currentSongIndex === -1) {
       // No song selected, play first one
       this.selectBestHitsSong(0);
